@@ -1256,7 +1256,7 @@
     <a onclick="scrollToSection('features')" class="nav-link">Features</a>
     <a onclick="scrollToSection('usecases')" class="nav-link">Use Cases</a>
     <a onclick="showPage('about')" class="nav-link" data-page="about">About Us</a>
-    <a class="nav-demo-btn" onclick="openModal()">🚀 Request Demo</a>
+    <a class="nav-demo-btn" onclick="window.location.href='platform.html'">🚀 Try Platform</a>
   </div>
 </nav>
 
@@ -1269,7 +1269,7 @@
     <h1>AI Agents That<br><span class="highlight">Talk Business</span></h1>
     <p>Describe your agent in plain English. Deploy on WhatsApp &amp; RCS in minutes. No flowcharts, no code — just prompts that convert.</p>
     <div class="hero-cta">
-      <button class="btn btn-primary btn-large" onclick="openModal()">Get Early Access →</button>
+      <button class="btn btn-primary btn-large" onclick="window.location.href='platform.html'">Launch Platform →</button>
       <button class="btn btn-secondary btn-large" onclick="scrollToSection('demo')">Try Live Demo ↓</button>
     </div>
     <div class="trust-row">
@@ -1492,7 +1492,7 @@
       <h2 class="reveal">Ready to deploy your<br>first AI agent?</h2>
       <p class="reveal" style="font-size: 17px; color: var(--text-body); max-width: 480px; margin: 0 auto 36px; line-height: 1.7;">Join 100+ enterprise teams already automating conversations on WhatsApp and RCS.</p>
       <div class="cta-btns reveal">
-        <button class="btn btn-primary btn-large" onclick="openModal()">Request Early Access →</button>
+        <button class="btn btn-primary btn-large" onclick="window.location.href='platform.html'">Launch Platform →</button>
         <button class="btn btn-secondary btn-large" onclick="showPage('about')">Meet the Founder</button>
       </div>
     </div>
@@ -1535,7 +1535,7 @@
           </div>
           <div class="founder-links">
             <a href="https://linkedin.com" target="_blank">LinkedIn</a>
-            <a href="mailto:nishant@agntpro.ai">Email</a>
+            <a href="/cdn-cgi/l/email-protection#e08e899388818e94a081878e9490928fce8189">Email</a>
             <a href="#" onclick="openModal(); return false;">Book a Call</a>
           </div>
         </div>
@@ -1606,7 +1606,7 @@
           </p>
 
           <div style="margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap;">
-            <button class="btn btn-primary btn-large" onclick="openModal()">Request a Demo →</button>
+            <button class="btn btn-primary btn-large" onclick="window.location.href='platform.html'">Try the Platform →</button>
             <button class="btn btn-secondary btn-large" onclick="showPage('home')">← Back to Platform</button>
           </div>
         </div>
@@ -1697,7 +1697,7 @@
   <div>© 2026 AgntPro.ai. All rights reserved.</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // === NAV SCROLL ===
   window.addEventListener('scroll', () => {
     document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 20);
@@ -1887,11 +1887,4 @@
 
     setTimeout(function() {
       typing.classList.remove('show');
-      var reply = replies[Math.floor(Math.random() * replies.length)];
-      addBubble(body, reply, 'bot-bubble');
-    }, 1200);
-  }
-</script>
-
-</body>
-</html>
+      var 
