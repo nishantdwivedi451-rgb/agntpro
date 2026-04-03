@@ -3,1899 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgntPro.ai — Agentic AI for Business Conversations</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>AgntPro.ai - AI Agents for Every Channel</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #FAFBFD;
-    --bg-white: #FFFFFF;
-    --bg-warm: #F5F3EF;
-    --bg-hero: linear-gradient(165deg, #FAFBFD 0%, #F0EDFF 40%, #E8F4FE 70%, #FAFBFD 100%);
-    --card-bg: #FFFFFF;
-    --card-border: #E8E5F0;
-    --card-hover: #F8F6FF;
-    --text-dark: #1A1035;
-    --text-body: #4A4362;
-    --text-muted: #8E87A5;
-    --accent: #6C3BF5;
-    --accent-light: #8B5CF6;
-    --accent-dark: #5025D1;
-    --accent-bg: #F0EDFF;
-    --accent-glow: rgba(108, 59, 245, 0.12);
-    --orange: #F97316;
-    --orange-bg: #FFF4EB;
-    --green: #10B981;
-    --green-bg: #ECFDF5;
-    --blue: #3B82F6;
-    --blue-bg: #EFF6FF;
-    --rose: #F43F5E;
-    --rose-bg: #FFF1F2;
-    --whatsapp: #25D366;
-    --rcs: #4285F4;
-    --radius: 14px;
-    --radius-lg: 20px;
-    --shadow-sm: 0 1px 3px rgba(26, 16, 53, 0.06);
-    --shadow-md: 0 4px 20px rgba(26, 16, 53, 0.08);
-    --shadow-lg: 0 12px 40px rgba(26, 16, 53, 0.1);
-    --shadow-xl: 0 20px 60px rgba(26, 16, 53, 0.14);
-    --font: 'Outfit', sans-serif;
-    --mono: 'JetBrains Mono', monospace;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: var(--font);
-    background: var(--bg);
-    color: var(--text-dark);
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* === NAV === */
-  nav {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-    padding: 0 48px;
-    height: 68px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(250, 251, 253, 0.85);
-    backdrop-filter: blur(20px) saturate(1.5);
-    border-bottom: 1px solid rgba(232, 229, 240, 0.6);
-    transition: box-shadow 0.3s;
-  }
-
-  nav.scrolled { box-shadow: var(--shadow-sm); }
-
-  .logo {
-    font-family: var(--mono);
-    font-size: 21px;
-    font-weight: 700;
-    color: var(--text-dark);
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    cursor: pointer;
-    text-decoration: none;
-  }
-
-  .logo-text {
-    letter-spacing: -0.8px;
-    white-space: nowrap;
-  }
-
-  .logo-text span { color: var(--accent); }
-
-  .logo-icon {
-    width: 30px;
-    height: 30px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-    font-weight: 800;
-    box-shadow: 0 2px 12px rgba(108, 59, 245, 0.3);
-    flex-shrink: 0;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .nav-links a {
-    color: var(--text-body);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-
-  .nav-links a:hover { background: var(--accent-bg); color: var(--accent); }
-  .nav-links a.active { color: var(--accent); background: var(--accent-bg); }
-
-  .nav-demo-btn {
-    background: var(--accent) !important;
-    color: white !important;
-    padding: 10px 24px !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-    box-shadow: 0 2px 16px rgba(108, 59, 245, 0.35);
-    border: 2px solid var(--accent) !important;
-    animation: demoPulse 2.5s ease-in-out infinite;
-    margin-left: 8px;
-  }
-
-  .nav-demo-btn:hover {
-    background: var(--accent-dark) !important;
-    box-shadow: 0 4px 24px rgba(108, 59, 245, 0.45) !important;
-    transform: translateY(-1px);
-  }
-
-  @keyframes demoPulse {
-    0%, 100% { box-shadow: 0 2px 16px rgba(108, 59, 245, 0.35); }
-    50% { box-shadow: 0 4px 28px rgba(108, 59, 245, 0.55), 0 0 0 4px rgba(108, 59, 245, 0.1); }
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: var(--font);
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-    padding: 11px 28px;
-    border-radius: 10px;
-    box-shadow: 0 2px 12px rgba(108, 59, 245, 0.25);
-  }
-
-  .btn-primary:hover {
-    background: var(--accent-dark);
-    box-shadow: 0 4px 20px rgba(108, 59, 245, 0.35);
-    transform: translateY(-1px);
-  }
-
-  .btn-secondary {
-    background: var(--bg-white);
-    color: var(--text-dark);
-    padding: 11px 28px;
-    border-radius: 10px;
-    border: 1.5px solid var(--card-border);
-  }
-
-  .btn-secondary:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-bg);
-  }
-
-  .btn-large {
-    padding: 15px 36px;
-    font-size: 16px;
-    border-radius: 12px;
-  }
-
-  /* === PAGES === */
-  .page {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-
-  .page.active {
-    display: block;
-    opacity: 1;
-  }
-
-  /* === HERO === */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 140px 24px 80px;
-    background: var(--bg-hero);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: '';
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(108, 59, 245, 0.08) 0%, transparent 70%);
-    top: -100px;
-    right: -200px;
-    pointer-events: none;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 18px;
-    background: var(--bg-white);
-    border: 1px solid var(--card-border);
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-body);
-    margin-bottom: 28px;
-    box-shadow: var(--shadow-sm);
-    animation: fadeUp 0.7s ease both;
-  }
-
-  .hero-badge .dot {
-    width: 7px;
-    height: 7px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: blink 2s ease-in-out infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .hero h1 {
-    font-size: clamp(38px, 5.5vw, 68px);
-    font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -2px;
-    max-width: 780px;
-    margin-bottom: 22px;
-    color: var(--text-dark);
-    animation: fadeUp 0.7s ease 0.1s both;
-  }
-
-  .hero h1 .highlight {
-    background: linear-gradient(135deg, var(--accent) 0%, #9333EA 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero > p {
-    font-size: 18px;
-    color: var(--text-body);
-    max-width: 520px;
-    line-height: 1.7;
-    margin-bottom: 36px;
-    animation: fadeUp 0.7s ease 0.2s both;
-  }
-
-  .hero-cta {
-    display: flex;
-    gap: 14px;
-    animation: fadeUp 0.7s ease 0.3s both;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .trust-row {
-    margin-top: 56px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    animation: fadeUp 0.7s ease 0.5s both;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .trust-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    font-weight: 600;
-  }
-
-  .trust-logos {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-  }
-
-  .trust-logo {
-    padding: 8px 20px;
-    background: var(--bg-white);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
-  }
-
-  /* === LIVE DEMO SECTION === */
-  .demo-section {
-    padding: 100px 24px;
-    background: var(--bg-white);
-  }
-
-  .demo-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 60px;
-    align-items: center;
-  }
-
-  .demo-left h2 {
-    font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 16px;
-    line-height: 1.15;
-  }
-
-  .demo-left > p {
-    font-size: 16px;
-    color: var(--text-body);
-    line-height: 1.7;
-    margin-bottom: 28px;
-  }
-
-  .prompt-input-box {
-    background: var(--bg);
-    border: 2px solid var(--card-border);
-    border-radius: var(--radius);
-    padding: 20px;
-    transition: border-color 0.3s;
-  }
-
-  .prompt-input-box:focus-within { border-color: var(--accent); }
-
-  .prompt-input-box label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 600;
-  }
-
-  .prompt-input-box textarea {
-    width: 100%;
-    border: none;
-    background: transparent;
-    font-family: var(--font);
-    font-size: 14px;
-    color: var(--text-dark);
-    resize: none;
-    outline: none;
-    line-height: 1.6;
-    min-height: 90px;
-  }
-
-  .prompt-input-box textarea::placeholder { color: var(--text-muted); }
-
-  .prompt-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 14px;
-  }
-
-  .channel-toggles {
-    display: flex;
-    gap: 8px;
-  }
-
-  .ch-toggle {
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    border: 1.5px solid var(--card-border);
-    background: var(--bg-white);
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .ch-toggle.active-wa { border-color: var(--whatsapp); background: rgba(37, 211, 102, 0.08); color: #1a8f4a; }
-  .ch-toggle.active-rcs { border-color: var(--rcs); background: rgba(66, 133, 244, 0.08); color: #2563EB; }
-
-  .ch-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .ch-dot.wa { background: var(--whatsapp); }
-  .ch-dot.rcs { background: var(--rcs); }
-
-  /* Phone mockup */
-  .phone-frame {
-    width: 320px;
-    margin: 0 auto;
-    background: #1A1035;
-    border-radius: 36px;
-    padding: 12px;
-    box-shadow: var(--shadow-xl), 0 0 0 1px rgba(108, 59, 245, 0.1);
-    position: relative;
-  }
-
-  .phone-notch {
-    width: 120px;
-    height: 28px;
-    background: #1A1035;
-    border-radius: 0 0 16px 16px;
-    margin: 0 auto;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 5;
-  }
-
-  .phone-screen {
-    background: #FFFFFF;
-    border-radius: 26px;
-    overflow: hidden;
-    min-height: 520px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .phone-status-bar {
-    padding: 14px 20px 8px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-dark);
-  }
-
-  .phone-chat-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px 12px;
-    border-bottom: 1px solid #F0EEF5;
-  }
-
-  .phone-back { font-size: 18px; color: var(--accent); cursor: pointer; }
-
-  .phone-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
-
-  .phone-avatar.wa-bg { background: rgba(37, 211, 102, 0.15); }
-  .phone-avatar.rcs-bg { background: rgba(66, 133, 244, 0.15); }
-
-  .phone-agent-name { font-size: 14px; font-weight: 600; }
-  .phone-agent-status { font-size: 11px; color: var(--green); font-weight: 500; }
-
-  .phone-chat-body {
-    flex: 1;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    overflow-y: auto;
-    background: #FAFBFD;
-  }
-
-  .bubble {
-    max-width: 82%;
-    padding: 10px 14px;
-    border-radius: 16px;
-    font-size: 13px;
-    line-height: 1.5;
-    opacity: 0;
-    transform: translateY(8px);
-    white-space: pre-line;
-  }
-
-  .bubble.show {
-    animation: bubbleIn 0.35s ease forwards;
-  }
-
-  @keyframes bubbleIn {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .bubble.user-bubble {
-    align-self: flex-end;
-    background: var(--accent);
-    color: white;
-    border-bottom-right-radius: 4px;
-    font-weight: 500;
-  }
-
-  .bubble.bot-bubble {
-    align-self: flex-start;
-    background: var(--bg-white);
-    color: var(--text-dark);
-    border-bottom-left-radius: 4px;
-    border: 1px solid #EEEAF5;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  }
-
-  .typing-indicator {
-    align-self: flex-start;
-    padding: 10px 16px;
-    background: var(--bg-white);
-    border: 1px solid #EEEAF5;
-    border-radius: 16px;
-    border-bottom-left-radius: 4px;
-    display: none;
-  }
-
-  .typing-indicator.show { display: flex; gap: 4px; }
-
-  .typing-dot {
-    width: 7px;
-    height: 7px;
-    background: var(--text-muted);
-    border-radius: 50%;
-    animation: typingBounce 1.2s ease-in-out infinite;
-  }
-
-  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
-
-  @keyframes typingBounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-5px); opacity: 1; }
-  }
-
-  .phone-input-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-top: 1px solid #F0EEF5;
-    background: white;
-  }
-
-  .phone-input-bar input {
-    flex: 1;
-    border: 1px solid #E8E5F0;
-    border-radius: 20px;
-    padding: 8px 14px;
-    font-size: 13px;
-    font-family: var(--font);
-    outline: none;
-    background: #FAFBFD;
-  }
-
-  .phone-input-bar input:focus { border-color: var(--accent); }
-
-  .phone-send {
-    width: 34px;
-    height: 34px;
-    background: var(--accent);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-  }
-
-  .phone-send:hover { background: var(--accent-dark); }
-
-  /* === SECTIONS === */
-  section { padding: 100px 24px; }
-
-  .section-center { text-align: center; max-width: 1100px; margin: 0 auto; }
-
-  .section-tag {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .section-title {
-    font-size: clamp(30px, 4vw, 44px);
-    font-weight: 700;
-    letter-spacing: -1.2px;
-    line-height: 1.12;
-    margin-bottom: 16px;
-  }
-
-  .section-desc {
-    font-size: 16px;
-    color: var(--text-body);
-    line-height: 1.7;
-    max-width: 540px;
-    margin: 0 auto 56px;
-  }
-
-  /* === HOW IT WORKS === */
-  .steps-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .step-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 32px 24px;
-    text-align: left;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .step-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transition: transform 0.3s;
-  }
-
-  .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-  .step-card:hover::after { transform: scaleX(1); }
-
-  .step-num {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--mono);
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-
-  .step-num.s1 { background: var(--accent-bg); color: var(--accent); }
-  .step-num.s2 { background: var(--orange-bg); color: var(--orange); }
-  .step-num.s3 { background: var(--green-bg); color: var(--green); }
-
-  .step-card h3 { font-size: 17px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.2px; }
-  .step-card p { font-size: 14px; color: var(--text-body); line-height: 1.7; }
-
-  /* === FEATURES === */
-  .features-section { background: var(--bg-warm); }
-
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .feat-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 28px 24px;
-    transition: all 0.3s;
-  }
-
-  .feat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--accent);
-  }
-
-  .feat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    margin-bottom: 18px;
-  }
-
-  .feat-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-  .feat-card p { font-size: 13px; color: var(--text-body); line-height: 1.7; }
-
-  /* === CHANNELS === */
-  .channels-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .chan-card {
-    background: var(--card-bg);
-    border: 1.5px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 36px 28px;
-    text-align: center;
-    transition: all 0.3s;
-  }
-
-  .chan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-  .chan-card.wa:hover { border-color: var(--whatsapp); }
-  .chan-card.rcs:hover { border-color: var(--rcs); }
-
-  .chan-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
-    margin: 0 auto 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-  }
-
-  .chan-card.wa .chan-icon { background: rgba(37, 211, 102, 0.1); }
-  .chan-card.rcs .chan-icon { background: rgba(66, 133, 244, 0.1); }
-
-  .chan-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-  .chan-card p { font-size: 14px; color: var(--text-body); line-height: 1.6; margin-bottom: 20px; }
-
-  .chan-stat {
-    font-family: var(--mono);
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .chan-stat small {
-    display: block;
-    font-family: var(--font);
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 400;
-    margin-top: 4px;
-  }
-
-  /* === METRICS BAR === */
-  .metrics-strip {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    max-width: 1000px;
-    margin: 0 auto;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-
-  .metric-item {
-    padding: 32px 24px;
-    text-align: center;
-    border-right: 1px solid var(--card-border);
-  }
-
-  .metric-item:last-child { border-right: none; }
-
-  .metric-val {
-    font-family: var(--mono);
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .metric-lbl {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 6px;
-    font-weight: 500;
-  }
-
-  /* === USE CASES === */
-  .uc-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-
-  .uc-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 28px 24px;
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-
-  .uc-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--accent); }
-
-  .uc-tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    display: inline-block;
-    margin-bottom: 14px;
-  }
-
-  .uc-card:nth-child(1) .uc-tag { background: var(--accent-bg); color: var(--accent); }
-  .uc-card:nth-child(2) .uc-tag { background: var(--orange-bg); color: var(--orange); }
-  .uc-card:nth-child(3) .uc-tag { background: var(--green-bg); color: var(--green); }
-  .uc-card:nth-child(4) .uc-tag { background: var(--blue-bg); color: var(--blue); }
-  .uc-card:nth-child(5) .uc-tag { background: var(--rose-bg); color: var(--rose); }
-  .uc-card:nth-child(6) .uc-tag { background: var(--accent-bg); color: var(--accent); }
-
-  .uc-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-  .uc-card p { font-size: 13px; color: var(--text-body); line-height: 1.7; }
-
-  /* === ABOUT US === */
-  .about-page { padding-top: 100px; }
-
-  .about-hero {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 60px 24px;
-  }
-
-  .about-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 56px;
-    align-items: start;
-    margin-top: 48px;
-  }
-
-  .founder-card {
-    background: var(--card-bg);
-    border: 1.5px solid var(--card-border);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    text-align: center;
-    position: sticky;
-    top: 100px;
-  }
-
-  .founder-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent) 0%, #9333EA 100%);
-    margin: 0 auto 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 34px;
-    color: white;
-    font-weight: 700;
-    font-family: var(--mono);
-    box-shadow: 0 8px 24px rgba(108, 59, 245, 0.25);
-    letter-spacing: -1px;
-  }
-
-  .founder-card h3 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-  .founder-card .founder-role { font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 16px; }
-
-  .founder-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--card-border);
-  }
-
-  .f-stat {
-    text-align: center;
-  }
-
-  .f-stat-val {
-    font-family: var(--mono);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .f-stat-lbl {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
-
-  .founder-links {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-  }
-
-  .founder-links a {
-    padding: 8px 18px;
-    border: 1.5px solid var(--card-border);
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-body);
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-
-  .founder-links a:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
-
-  .about-content h2 {
-    font-size: 36px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 20px;
-    line-height: 1.15;
-  }
-
-  .about-content p {
-    font-size: 16px;
-    color: var(--text-body);
-    line-height: 1.8;
-    margin-bottom: 20px;
-  }
-
-  .about-content h3 {
-    font-size: 20px;
-    font-weight: 600;
-    margin-top: 36px;
-    margin-bottom: 14px;
-    color: var(--text-dark);
-  }
-
-  .highlight-box {
-    background: var(--accent-bg);
-    border: 1px solid rgba(108, 59, 245, 0.15);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin: 24px 0;
-  }
-
-  .highlight-box p { color: var(--text-dark); margin-bottom: 0; }
-
-  .clients-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin: 20px 0;
-  }
-
-  .client-chip {
-    padding: 12px 16px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-body);
-    text-align: center;
-    transition: all 0.2s;
-  }
-
-  .client-chip:hover { border-color: var(--accent); color: var(--accent); }
-
-  .timeline {
-    margin: 24px 0;
-    padding-left: 24px;
-    border-left: 2px solid var(--accent-bg);
-  }
-
-  .timeline-item {
-    position: relative;
-    padding-bottom: 24px;
-    padding-left: 20px;
-  }
-
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -29px;
-    top: 6px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: 3px solid var(--accent-bg);
-  }
-
-  .timeline-item h4 { font-size: 14px; font-weight: 600; color: var(--text-dark); }
-  .timeline-item p { font-size: 13px; color: var(--text-body); margin-top: 4px; line-height: 1.6; }
-  .timeline-item .tl-year { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; }
-
-  /* === CTA === */
-  .cta-section {
-    text-align: center;
-    background: var(--bg-hero);
-  }
-
-  .cta-section h2 {
-    font-size: clamp(32px, 4vw, 50px);
-    font-weight: 700;
-    letter-spacing: -1.5px;
-    margin-bottom: 16px;
-  }
-
-  .cta-section > p, .cta-section .section-center > p {
-    font-size: 17px;
-    color: var(--text-body);
-    max-width: 480px;
-    margin: 0 auto 36px;
-    line-height: 1.7;
-  }
-
-  .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-
-  /* === MODAL === */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(26, 16, 53, 0.5);
-    backdrop-filter: blur(8px);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--bg-white);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
-    width: 100%;
-    max-width: 480px;
-    overflow: hidden;
-    animation: modalIn 0.3s ease;
-  }
-
-  @keyframes modalIn {
-    from { opacity: 0; transform: translateY(20px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .modal-header {
-    padding: 24px 28px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
-  .modal-header h3 { font-size: 22px; font-weight: 700; }
-  .modal-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
-
-  .modal-close {
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
-    background: transparent;
-    font-size: 18px;
-    cursor: pointer;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .modal-close:hover { background: var(--rose-bg); color: var(--rose); border-color: transparent; }
-
-  .modal-body { padding: 24px 28px 28px; }
-
-  .form-group { margin-bottom: 16px; }
-
-  .form-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-dark);
-    margin-bottom: 6px;
-  }
-
-  .form-group input, .form-group select {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1.5px solid var(--card-border);
-    border-radius: 10px;
-    font-family: var(--font);
-    font-size: 14px;
-    color: var(--text-dark);
-    outline: none;
-    background: var(--bg);
-    transition: border-color 0.2s;
-  }
-
-  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
-
-  .form-group input::placeholder { color: var(--text-muted); }
-
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .form-submit {
-    width: 100%;
-    margin-top: 8px;
-  }
-
-  .success-state {
-    display: none;
-    text-align: center;
-    padding: 40px 28px;
-  }
-
-  .success-state.show { display: block; }
-
-  .success-icon {
-    width: 64px;
-    height: 64px;
-    background: var(--green-bg);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin: 0 auto 20px;
-  }
-
-  .success-state h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .success-state p { font-size: 14px; color: var(--text-body); line-height: 1.6; }
-
-  /* === FOOTER === */
-  footer {
-    padding: 32px 48px;
-    border-top: 1px solid var(--card-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    color: var(--text-muted);
-    background: var(--bg-white);
-  }
-
-  .footer-links { display: flex; gap: 24px; }
-
-  .footer-links a {
-    color: var(--text-body);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-  }
-
-  .footer-links a:hover { color: var(--accent); }
-
-  /* === ANIMATIONS === */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .reveal.vis { opacity: 1; transform: translateY(0); }
-
-  /* === RESPONSIVE === */
-  @media (max-width: 900px) {
-    nav { padding: 0 20px; }
-    .nav-links a:not(.nav-demo-btn) { display: none; }
-    .nav-demo-btn { font-size: 13px !important; padding: 8px 16px !important; }
-    section { padding: 70px 16px; }
-    .hero { padding: 120px 16px 60px; }
-    .steps-row, .features-grid, .uc-grid { grid-template-columns: 1fr; }
-    .channels-row { grid-template-columns: 1fr; }
-    .metrics-strip { grid-template-columns: 1fr 1fr; }
-    .metric-item { border-right: none; border-bottom: 1px solid var(--card-border); }
-    .demo-container { grid-template-columns: 1fr; }
-    .phone-frame { margin-top: 32px; }
-    .about-grid { grid-template-columns: 1fr; }
-    .founder-card { position: static; }
-    .clients-grid { grid-template-columns: 1fr 1fr; }
-    .form-row { grid-template-columns: 1fr; }
-    footer { flex-direction: column; gap: 16px; text-align: center; }
-  }
+:root{--bg:#FAFAF8;--white:#FFF;--warm:#F6F4F0;--card:#FFF;--border:#E6E3DC;--border-h:#CCC8BF;--dark:#141210;--body:#3D3A34;--muted:#8A8680;--faint:#B5B1AA;--accent:#2563EB;--accent-d:#1D4ED8;--accent-bg:#EFF6FF;--green:#059669;--green-bg:#ECFDF5;--orange:#D97706;--orange-bg:#FFFBEB;--rose:#E11D48;--rose-bg:#FFF1F2;--teal:#0D9488;--teal-bg:#F0FDFA;--r:12px;--rl:16px;--shadow:0 1px 3px rgba(20,18,16,.06);--shadow-md:0 4px 20px rgba(20,18,16,.08);--shadow-lg:0 12px 40px rgba(20,18,16,.1);--font:'Sora',sans-serif;--mono:'IBM Plex Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:var(--font);background:var(--bg);color:var(--dark);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+nav{position:fixed;top:0;width:100%;z-index:1000;padding:0 48px;height:64px;display:flex;justify-content:space-between;align-items:center;background:rgba(250,250,248,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(230,227,220,.5);transition:box-shadow .3s}nav.scrolled{box-shadow:var(--shadow)}
+.logo{display:flex;align-items:center;gap:7px;text-decoration:none;cursor:pointer}.logo-mark{width:28px;height:28px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 13px/1 var(--mono)}.logo-text{font:700 18px/1 var(--mono);color:var(--dark);letter-spacing:-.5px}.logo-text span{color:var(--accent)}
+.nav-links{display:flex;gap:6px;align-items:center}.nav-links a{color:var(--body);text-decoration:none;font-size:13px;font-weight:500;padding:7px 14px;border-radius:8px;transition:all .2s;cursor:pointer}.nav-links a:hover{background:var(--accent-bg);color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font);font-weight:600;font-size:13px;border:none;cursor:pointer;transition:all .2s;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;padding:9px 22px;border-radius:8px}.btn-primary:hover{background:var(--accent-d);box-shadow:0 2px 12px rgba(37,99,235,.25);transform:translateY(-1px)}
+.btn-secondary{background:var(--white);color:var(--dark);padding:9px 22px;border-radius:8px;border:1.5px solid var(--border)}.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-green{background:var(--green);color:#fff;padding:9px 22px;border-radius:8px}.btn-green:hover{background:#047857}
+.btn-lg{padding:13px 32px;font-size:15px;border-radius:10px}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:130px 24px 80px;background:linear-gradient(170deg,#FAFAF8 0%,#EFF6FF 40%,#F0FDFA 70%,#FAFAF8 100%)}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:var(--white);border:1px solid var(--border);border-radius:100px;font-size:12px;font-weight:500;color:var(--body);margin-bottom:28px;box-shadow:var(--shadow);animation:fadeUp .7s ease both}
+.hero-badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 2s ease-in-out infinite}@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(36px,5.5vw,64px);font-weight:800;line-height:1.08;letter-spacing:-2px;max-width:750px;margin-bottom:20px;animation:fadeUp .7s ease .1s both}
+.hero h1 .hl{background:linear-gradient(135deg,var(--accent),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero>p{font-size:17px;color:var(--body);max-width:520px;line-height:1.7;margin-bottom:32px;animation:fadeUp .7s ease .2s both}
+.hero-cta{display:flex;gap:12px;animation:fadeUp .7s ease .3s both;flex-wrap:wrap;justify-content:center}
+.trust-row{margin-top:48px;display:flex;align-items:center;gap:28px;animation:fadeUp .7s ease .5s both;flex-wrap:wrap;justify-content:center}
+.trust-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}.trust-logos{display:flex;gap:20px}.trust-logo{padding:7px 18px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--muted)}
+.metrics-strip{display:grid;grid-template-columns:repeat(4,1fr);max-width:960px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}.metric-item{padding:28px 20px;text-align:center;border-right:1px solid var(--border)}.metric-item:last-child{border-right:none}.metric-val{font:700 28px/1 var(--mono);color:var(--accent)}.metric-lbl{font-size:12px;color:var(--muted);margin-top:6px}
+section{padding:100px 24px}.section-center{text-align:center;max-width:1100px;margin:0 auto}.section-tag{font:600 11px/1 var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}.section-title{font-size:clamp(28px,3.5vw,40px);font-weight:700;letter-spacing:-1px;line-height:1.12;margin-bottom:14px}.section-desc{font-size:15px;color:var(--body);line-height:1.7;max-width:520px;margin:0 auto 48px}
+.demo-section{background:var(--white);padding:100px 24px}.demo-container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}.demo-left h2{font-size:32px;font-weight:700;letter-spacing:-.8px;margin-bottom:14px;line-height:1.15}.demo-left>p{font-size:15px;color:var(--body);line-height:1.7;margin-bottom:24px}
+.industry-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}.ind-tab{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:all .2s;font-family:var(--font)}.ind-tab.active{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.prompt-box{background:var(--bg);border:2px solid var(--border);border-radius:var(--r);padding:18px;transition:border-color .3s}.prompt-box:focus-within{border-color:var(--accent)}.prompt-box label{font:600 10px/1 var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:8px}.prompt-box textarea{width:100%;border:none;background:transparent;font-family:var(--font);font-size:13px;color:var(--dark);resize:none;outline:none;line-height:1.6;min-height:80px}
+.prompt-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px}.ch-tabs{display:flex;gap:6px}.ch-tab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:var(--white);cursor:pointer;transition:all .2s;font-family:var(--font);display:flex;align-items:center;gap:5px}.ch-tab.active-web{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}.ch-tab.active-wa{border-color:#25D366;background:rgba(37,211,102,.08);color:#1a8f4a}.ch-tab.active-rcs{border-color:#4285F4;background:rgba(66,133,244,.08);color:#2563EB}.ch-dot{width:7px;height:7px;border-radius:50%}
+.preview-frame{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--shadow-lg);min-height:480px;display:flex;flex-direction:column}.preview-header{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg)}.preview-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff}.preview-name{font-size:13px;font-weight:600}.preview-status{font-size:11px;color:var(--green)}.preview-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;background:var(--bg);min-height:320px}
+.bub{max-width:78%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;opacity:0;transform:translateY(8px);white-space:pre-line}.bub.show{animation:bubIn .35s ease forwards}@keyframes bubIn{to{opacity:1;transform:translateY(0)}}.bub-user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px;font-weight:500}.bub-bot{align-self:flex-start;background:var(--white);color:var(--dark);border-bottom-left-radius:4px;border:1px solid var(--border)}
+.typing-ind{align-self:flex-start;padding:12px 16px;background:var(--white);border:1px solid var(--border);border-radius:14px;border-bottom-left-radius:4px;display:none;gap:4px}.typing-ind.show{display:flex}.td{width:6px;height:6px;background:var(--faint);border-radius:50%;animation:tbounce 1.2s ease-in-out infinite}.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}@keyframes tbounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.preview-input{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--border)}.preview-input input{flex:1;border:1px solid var(--border);border-radius:18px;padding:8px 14px;font-size:12px;font-family:var(--font);outline:none;background:var(--bg)}.preview-send{width:30px;height:30px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.quick-qs{display:flex;flex-direction:column;gap:5px;margin-top:8px}.qq{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--body);cursor:pointer;text-align:left;font-family:var(--font);transition:all .15s}.qq:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.steps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:960px;margin:0 auto}.step-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:28px 22px;transition:all .3s;position:relative;overflow:hidden}.step-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--accent);transform:scaleX(0);transition:transform .3s}.step-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}.step-card:hover::after{transform:scaleX(1)}.step-num{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 14px/1 var(--mono);margin-bottom:18px}.step-card h3{font-size:16px;font-weight:600;margin-bottom:8px}.step-card p{font-size:13px;color:var(--body);line-height:1.7}
+.features-section{background:var(--warm)}.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1060px;margin:0 auto}.feat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px 20px;transition:all .3s}.feat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--accent)}.feat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:16px;font-weight:700;color:#fff}.feat-card h3{font-size:15px;font-weight:600;margin-bottom:6px}.feat-card p{font-size:12px;color:var(--body);line-height:1.7}
+.channels-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:0 auto}.chan-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:32px 24px;text-align:center;transition:all .3s}.chan-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}.chan-icon{width:52px;height:52px;border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff}.chan-card h3{font-size:18px;font-weight:600;margin-bottom:6px}.chan-card p{font-size:13px;color:var(--body);line-height:1.6;margin-bottom:16px}.chan-stat{font:700 24px/1 var(--mono);color:var(--accent)}.chan-stat small{display:block;font:400 11px/1.4 var(--font);color:var(--muted);margin-top:4px}
+.uc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1060px;margin:0 auto}.uc-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px 20px;transition:all .3s;cursor:pointer}.uc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--accent)}.uc-tag{font:600 10px/1 var(--mono);text-transform:uppercase;letter-spacing:1.5px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:12px}.uc-card h3{font-size:15px;font-weight:600;margin-bottom:6px}.uc-card p{font-size:12px;color:var(--body);line-height:1.7}
+.about-page{padding-top:100px}.about-hero{max-width:960px;margin:0 auto;padding:60px 24px}.about-grid{display:grid;grid-template-columns:300px 1fr;gap:48px;align-items:start;margin-top:40px}
+.founder-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--rl);padding:28px;text-align:center;position:sticky;top:90px}.founder-avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--teal));margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font:700 30px/1 var(--mono);color:#fff;letter-spacing:-1px}.founder-card h3{font-size:20px;font-weight:700;margin-bottom:2px}.founder-role{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:14px}
+.founder-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}.f-stat-val{font:700 20px/1 var(--mono);color:var(--accent)}.f-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.founder-links{display:flex;gap:8px;justify-content:center;margin-top:18px}.founder-links a{padding:6px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;color:var(--body);text-decoration:none;transition:all .2s}.founder-links a:hover{border-color:var(--accent);color:var(--accent)}
+.about-content h2{font-size:32px;font-weight:700;letter-spacing:-.8px;margin-bottom:18px;line-height:1.15}.about-content p{font-size:15px;color:var(--body);line-height:1.8;margin-bottom:18px}.about-content h3{font-size:18px;font-weight:600;margin-top:32px;margin-bottom:12px}
+.highlight-box{background:var(--accent-bg);border:1px solid rgba(37,99,235,.12);border-radius:var(--r);padding:22px;margin:20px 0}.highlight-box p{color:var(--dark);margin-bottom:0}
+.clients-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.client-chip{padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--body);text-align:center}
+.timeline{margin:20px 0;padding-left:22px;border-left:2px solid var(--accent-bg)}.tl-item{position:relative;padding-bottom:22px;padding-left:18px}.tl-item::before{content:'';position:absolute;left:-27px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--accent);border:3px solid var(--accent-bg)}.tl-item h4{font-size:13px;font-weight:600}.tl-item p{font-size:12px;color:var(--body);margin-top:3px;line-height:1.6}.tl-year{font:600 10px/1 var(--mono);color:var(--accent)}
+.cta-section{text-align:center;background:linear-gradient(170deg,#FAFAF8 0%,#EFF6FF 50%,#F0FDFA 100%)}.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+/* KPI CALCULATOR */
+.kpi-section{background:var(--white)}.kpi-wrap{max-width:720px;margin:0 auto}.kpi-progress{display:flex;gap:6px;margin-bottom:28px}.kpi-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:all .3s}.kpi-dot.on{background:var(--accent)}.kpi-step-title{font-size:18px;font-weight:600;margin-bottom:6px}.kpi-step-sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+.kpi-ind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}.kpi-ind{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .2s;font-family:var(--font);font-size:13px;font-weight:500;text-align:left}.kpi-ind.sel{border-color:var(--accent);background:var(--accent-bg)}.kpi-ind-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 10px/1 var(--mono);flex-shrink:0}
+.kpi-uc{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;cursor:pointer;font-size:12px;color:var(--body);display:flex;align-items:center;gap:8px;transition:all .15s;font-family:var(--font)}.kpi-uc.sel{border-color:var(--accent);background:var(--accent-bg);font-weight:600;color:var(--accent)}.kpi-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff}.kpi-uc.sel .kpi-chk{background:var(--accent);border-color:var(--accent)}
+.kpi-ch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.kpi-ch{border:2px solid var(--border);border-radius:12px;padding:18px 16px;cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font)}.kpi-ch.sel{border-color:var(--accent);background:var(--accent-bg)}.kpi-ch-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font:700 12px/1 var(--mono);margin:0 auto 8px}
+.kpi-slider-box{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:14px}.kpi-slider-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.kpi-slider-lbl{font-size:13px;font-weight:500;color:var(--body)}.kpi-slider-val{font:700 18px/1 var(--mono);color:var(--accent)}
+.kpi-slider{width:100%;accent-color:var(--accent);margin:4px 0}
+.kpi-btn-row{display:flex;justify-content:space-between;margin-top:24px;gap:10px}
+.kpi-big-save{background:linear-gradient(135deg,#EFF6FF,#F0FDFA);border:2px solid var(--accent);border-radius:16px;padding:24px;text-align:center;margin-bottom:18px}
+.kpi-result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.kpi-result-card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:16px;text-align:center}.kpi-result-val{font:700 26px/1 var(--mono)}.kpi-result-lbl{font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-cost-box{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:18px;margin-bottom:14px}
+.kpi-cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.kpi-cost-tag{font:600 10px/1 var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}.kpi-cost-line{font-size:12px;color:var(--body);line-height:1.8}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,18,16,.45);backdrop-filter:blur(8px);z-index:2000;justify-content:center;align-items:center;padding:24px}.modal-overlay.open{display:flex}.modal{background:var(--white);border-radius:var(--rl);box-shadow:var(--shadow-lg);width:100%;max-width:460px;overflow:hidden;animation:modalIn .3s ease}@keyframes modalIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{padding:22px 24px 0;display:flex;justify-content:space-between;align-items:flex-start}.modal-head h3{font-size:20px;font-weight:700}.modal-head p{font-size:13px;color:var(--muted);margin-top:3px}.modal-close{width:32px;height:32px;border:1px solid var(--border);border-radius:8px;background:transparent;font-size:16px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.modal-body{padding:20px 24px 24px}.fg{margin-bottom:14px}.fg label{display:block;font-size:12px;font-weight:600;color:var(--dark);margin-bottom:5px}.fg input,.fg select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font:400 13px/1 var(--font);color:var(--dark);outline:none;background:var(--bg)}.fg input:focus,.fg select:focus{border-color:var(--accent)}.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.success-state{display:none;text-align:center;padding:36px 24px}.success-state.show{display:block}.success-icon{width:56px;height:56px;background:var(--green-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 18px;color:var(--green);font-weight:700}
+footer{padding:28px 48px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);background:var(--white)}.footer-links{display:flex;gap:20px}.footer-links a{color:var(--body);text-decoration:none;font-weight:500}.footer-links a:hover{color:var(--accent)}
+.page{display:none;opacity:0;transition:opacity .4s}.page.active{display:block;opacity:1}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}.reveal{opacity:0;transform:translateY(22px);transition:all .6s cubic-bezier(.16,1,.3,1)}.reveal.vis{opacity:1;transform:translateY(0)}
+@media(max-width:900px){nav{padding:0 20px}.nav-links a:not(.btn-primary):not(.btn-green){display:none}section{padding:70px 16px}.hero{padding:110px 16px 60px}.steps-row,.features-grid,.uc-grid,.channels-row{grid-template-columns:1fr}.metrics-strip{grid-template-columns:1fr 1fr}.metric-item{border-right:none;border-bottom:1px solid var(--border)}.demo-container{grid-template-columns:1fr}.about-grid{grid-template-columns:1fr}.founder-card{position:static}.clients-grid{grid-template-columns:1fr 1fr}footer{flex-direction:column;gap:14px;text-align:center}}
 </style>
 </head>
 <body>
+<nav id="mainNav"><a class="logo" onclick="showPage('home')"><div class="logo-mark">A</div><div class="logo-text">AgntPro<span>.ai</span></div></a><div class="nav-links"><a onclick="showPage('home')" data-page="home">Platform</a><a onclick="scrollTo('how')">How It Works</a><a onclick="scrollTo('features')">Features</a><a onclick="scrollTo('usecases')">Use Cases</a><a onclick="scrollTo('calculator')">ROI Calculator</a><a onclick="showPage('about')" data-page="about">About</a><a class="btn btn-secondary" onclick="openModal()">Request Demo</a><a class="btn btn-green" onclick="window.location.href='platform.html'">Launch Platform</a></div></nav>
 
-<!-- NAV -->
-<nav id="mainNav">
-  <a class="logo" onclick="showPage('home')">
-    <div class="logo-icon">A</div>
-    <div class="logo-text">AgntPro<span>.ai</span></div>
-  </a>
-  <div class="nav-links">
-    <a onclick="showPage('home')" class="nav-link active" data-page="home">Platform</a>
-    <a onclick="scrollToSection('how')" class="nav-link">How It Works</a>
-    <a onclick="scrollToSection('features')" class="nav-link">Features</a>
-    <a onclick="scrollToSection('usecases')" class="nav-link">Use Cases</a>
-    <a onclick="showPage('about')" class="nav-link" data-page="about">About Us</a>
-    <a class="nav-demo-btn" onclick="openModal()">🚀 Request Demo</a>
-    <a class="nav-demo-btn" onclick="window.location.href='platform.html'" style="background: #10B981 !important; border-color: #10B981 !important; box-shadow: 0 2px 16px rgba(16,185,129,0.35); animation: none;">▶ Launch Platform</a>
-  </div>
-</nav>
-
-<!-- ========== HOME PAGE ========== -->
 <div class="page active" id="page-home">
+<section class="hero"><div class="hero-badge"><div class="dot"></div> Now in Private Beta</div><h1>AI Agents for<br><span class="hl">Every Channel</span></h1><p>Deploy intelligent chatbots on your website, WhatsApp, and RCS in minutes. Just write a prompt — no code, no flowcharts.</p><div class="hero-cta"><button class="btn btn-primary btn-lg" onclick="openModal()">Request Demo</button><button class="btn btn-green btn-lg" onclick="window.location.href='platform.html'">Launch Platform</button><button class="btn btn-secondary btn-lg" onclick="scrollTo('demo')">See Live Demo</button></div><div class="trust-row"><div class="trust-label">Trusted by</div><div class="trust-logos"><div class="trust-logo">Top 3 Indian Banks</div><div class="trust-logo">Leading Retailers</div><div class="trust-logo">Electronics Giants</div></div></div></section>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-badge"><div class="dot"></div> Now in Private Beta — 100+ Agents Deployed</div>
-    <h1>AI Agents That<br><span class="highlight">Talk Business</span></h1>
-    <p>Describe your agent in plain English. Deploy on WhatsApp &amp; RCS in minutes. No flowcharts, no code — just prompts that convert.</p>
-    <div class="hero-cta">
-      <button class="btn btn-primary btn-large" onclick="openModal()">Get Early Access →</button>
-      <button class="btn btn-secondary btn-large" onclick="window.location.href='platform.html'" style="background: #10B981; color: white; border-color: #10B981;">▶ Launch Platform</button>
-      <button class="btn btn-secondary btn-large" onclick="scrollToSection('demo')">Try Live Demo ↓</button>
-    </div>
-    <div class="trust-row">
-      <div class="trust-label">Trusted by</div>
-      <div class="trust-logos">
-        <div class="trust-logo">Top 3 Indian Banks</div>
-        <div class="trust-logo">Leading Retailers</div>
-        <div class="trust-logo">Electronics Giants</div>
-      </div>
-    </div>
-  </section>
+<section style="padding:50px 24px"><div class="metrics-strip reveal"><div class="metric-item"><div class="metric-val">100+</div><div class="metric-lbl">Agents deployed</div></div><div class="metric-item"><div class="metric-val">3</div><div class="metric-lbl">Channels supported</div></div><div class="metric-item"><div class="metric-val">89%</div><div class="metric-lbl">Auto-resolution rate</div></div><div class="metric-item"><div class="metric-val">2 min</div><div class="metric-lbl">Average deploy time</div></div></div></section>
 
-  <!-- METRICS -->
-  <section style="padding: 60px 24px;">
-    <div class="metrics-strip reveal">
-      <div class="metric-item">
-        <div class="metric-val">100+</div>
-        <div class="metric-lbl">Agents deployed</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">89%</div>
-        <div class="metric-lbl">Auto-resolution rate</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">3 min</div>
-        <div class="metric-lbl">Avg. deploy time</div>
-      </div>
-      <div class="metric-item">
-        <div class="metric-val">40%</div>
-        <div class="metric-lbl">Cost reduction vs IVR</div>
-      </div>
-    </div>
-  </section>
+<section class="demo-section" id="demo"><div class="demo-container"><div class="demo-left"><div class="section-tag">Live Demo</div><h2>Pick an industry.<br>See the agent in action.</h2><p>Select an industry and channel. The agent is pre-loaded with realistic prompts and knowledge.</p><div class="industry-tabs" id="indTabs"><button class="ind-tab active" onclick="setIndustry('ecom',this)">E-Commerce</button><button class="ind-tab" onclick="setIndustry('bfsi',this)">Banking</button><button class="ind-tab" onclick="setIndustry('health',this)">Healthcare</button><button class="ind-tab" onclick="setIndustry('edu',this)">EdTech</button><button class="ind-tab" onclick="setIndustry('real',this)">Real Estate</button><button class="ind-tab" onclick="setIndustry('gov',this)">Government</button></div><div class="prompt-box"><label>Agent Prompt</label><textarea id="promptInput" readonly></textarea><div class="prompt-actions"><div class="ch-tabs"><button class="ch-tab active-web" id="togWeb" onclick="setChannel('web')"><div class="ch-dot" style="background:var(--accent)"></div> Website</button><button class="ch-tab" id="togWa" onclick="setChannel('wa')"><div class="ch-dot" style="background:#25D366"></div> WhatsApp</button><button class="ch-tab" id="togRcs" onclick="setChannel('rcs')"><div class="ch-dot" style="background:#4285F4"></div> RCS</button></div><button class="btn btn-primary" onclick="runDemo()">Deploy Agent</button></div></div></div><div><div class="preview-frame"><div class="preview-header"><div class="preview-avatar" id="prevAvatar" style="background:var(--accent)">S</div><div><div class="preview-name" id="prevName">ShopEase Support</div><div class="preview-status">Online</div></div></div><div class="preview-body" id="previewBody"><div style="text-align:center;padding:40px 16px;color:var(--muted);font-size:13px">Select an industry and hit <strong style="color:var(--accent)">Deploy Agent</strong> to see the conversation</div></div><div class="preview-input"><input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendUser()"><button class="preview-send" onclick="sendUser()">&#8593;</button></div></div><div class="quick-qs" id="quickQs"></div></div></div></section>
 
-  <!-- LIVE DEMO -->
-  <section class="demo-section" id="demo">
-    <div class="demo-container">
-      <div class="demo-left">
-        <div class="section-tag">Live Demo</div>
-        <h2>Write a prompt.<br>Watch it come alive.</h2>
-        <p>Type what your agent should do — we'll simulate the conversation on your chosen channel in real time.</p>
-        <div class="prompt-input-box">
-          <label>Your Agent Prompt</label>
-          <textarea id="promptInput" placeholder="e.g. You are a loan advisor for QuickBank. Help customers check eligibility, calculate EMI, and collect documents via WhatsApp.">You are QuickBank's loan advisor. Help users check home loan eligibility based on income, show EMI breakdowns, and collect PAN photos for KYC. Be friendly and RBI-compliant.</textarea>
-          <div class="prompt-actions">
-            <div class="channel-toggles">
-              <button class="ch-toggle active-wa" id="togWa" onclick="setChannel('wa')"><div class="ch-dot wa"></div> WhatsApp</button>
-              <button class="ch-toggle" id="togRcs" onclick="setChannel('rcs')"><div class="ch-dot rcs"></div> RCS</button>
-            </div>
-            <button class="btn btn-primary" onclick="runDemo()">Deploy Agent ▶</button>
-          </div>
-        </div>
-      </div>
-      <div class="demo-right">
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="phone-status-bar">
-              <span>9:41</span>
-              <span>●●●</span>
-            </div>
-            <div class="phone-chat-header">
-              <span class="phone-back">‹</span>
-              <div class="phone-avatar wa-bg" id="phoneAvatar">🏦</div>
-              <div>
-                <div class="phone-agent-name" id="phoneAgentName">QuickBank</div>
-                <div class="phone-agent-status">● Online</div>
-              </div>
-            </div>
-            <div class="phone-chat-body" id="phoneChat">
-              <div style="text-align:center; padding: 60px 20px; color: var(--text-muted); font-size: 14px;">
-                Write a prompt and hit <strong style="color:var(--accent);">Deploy Agent</strong> to see the magic ✨
-              </div>
-            </div>
-            <div class="phone-input-bar">
-              <input type="text" id="userMsgInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendUserMsg()">
-              <button class="phone-send" onclick="sendUserMsg()">↑</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+<section id="how"><div class="section-center"><div class="section-tag reveal">How It Works</div><div class="section-title reveal">Three steps to your first AI agent</div><div class="section-desc reveal">No engineering team needed. From idea to live agent in under 5 minutes.</div></div><div class="steps-row"><div class="step-card reveal"><div class="step-num" style="background:var(--accent-bg);color:var(--accent)">01</div><h3>Describe Your Agent</h3><p>Write a natural language prompt defining your agent's role, tone, capabilities, and business rules.</p></div><div class="step-card reveal"><div class="step-num" style="background:var(--orange-bg);color:var(--orange)">02</div><h3>Choose Your Channels</h3><p>Deploy on your website as a chatbot, connect WhatsApp Business API, or enable RCS. Or all three.</p></div><div class="step-card reveal"><div class="step-num" style="background:var(--green-bg);color:var(--green)">03</div><h3>Go Live and Iterate</h3><p>Deploy instantly. Monitor conversations, refine prompts, and watch resolution rates climb.</p></div></div></section>
 
-  <!-- HOW IT WORKS -->
-  <section id="how">
-    <div class="section-center">
-      <div class="section-tag reveal">How It Works</div>
-      <div class="section-title reveal">Three steps to your<br>first AI agent</div>
-      <div class="section-desc reveal">No engineering team required. From idea to live agent in under 5 minutes.</div>
-    </div>
-    <div class="steps-row">
-      <div class="step-card reveal">
-        <div class="step-num s1">01</div>
-        <h3>Describe Your Agent</h3>
-        <p>Write a natural language prompt — the agent's role, tone, capabilities, and business rules. Like briefing a new team member.</p>
-      </div>
-      <div class="step-card reveal">
-        <div class="step-num s2">02</div>
-        <h3>Connect Channels</h3>
-        <p>Link WhatsApp Business API or RCS in one click. We handle message routing, compliance, and session management.</p>
-      </div>
-      <div class="step-card reveal">
-        <div class="step-num s3">03</div>
-        <h3>Go Live &amp; Iterate</h3>
-        <p>Deploy instantly. Monitor real conversations, refine prompts with analytics, and watch your agent improve over time.</p>
-      </div>
-    </div>
-  </section>
+<section class="features-section" id="features"><div class="section-center"><div class="section-tag reveal">Platform</div><div class="section-title reveal">Enterprise-grade capabilities,<br>startup-speed deployment</div><div class="section-desc reveal">Everything you need to automate conversations at scale.</div></div><div class="features-grid"><div class="feat-card reveal"><div class="feat-icon" style="background:var(--accent)">P</div><h3>Prompt-Driven Agents</h3><p>Define behavior, personality, and logic through natural language. Update in seconds.</p></div><div class="feat-card reveal"><div class="feat-icon" style="background:var(--teal)">W</div><h3>Website Chatbot</h3><p>Embed a branded AI chatbot on any site with a single script tag. Fully customizable.</p></div><div class="feat-card reveal"><div class="feat-icon" style="background:var(--green)">K</div><h3>Knowledge Base</h3><p>Upload PDFs, scrape URLs, or paste text. Agents answer from your actual data.</p></div><div class="feat-card reveal"><div class="feat-icon" style="background:var(--orange)">H</div><h3>Smart Human Handoff</h3><p>Seamless escalation when AI detects complexity. Full context transfers automatically.</p></div><div class="feat-card reveal"><div class="feat-icon" style="background:var(--rose)">A</div><h3>Live Analytics</h3><p>Real-time dashboards for resolution rates, sentiment, and prompt performance.</p></div><div class="feat-card reveal"><div class="feat-icon" style="background:var(--dark)">L</div><h3>50+ Languages</h3><p>Auto-detect and switch languages mid-conversation. Hindi, Tamil, Bengali, English.</p></div></div></section>
 
-  <!-- FEATURES -->
-  <section class="features-section" id="features">
-    <div class="section-center">
-      <div class="section-tag reveal">Platform Features</div>
-      <div class="section-title reveal">Enterprise-grade power,<br>startup-speed setup</div>
-      <div class="section-desc reveal">Everything you need to automate customer conversations at scale.</div>
-    </div>
-    <div class="features-grid">
-      <div class="feat-card reveal">
-        <div class="feat-icon" style="background: var(--accent-bg);">🧠</div>
-        <h3>Prompt-Driven Agents</h3>
-        <p>Define behavior, personality, guardrails, and logic entirely through prompts. Update in seconds, no redeploy.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon" style="background: var(--orange-bg);">🔄</div>
-        <h3>Smart Human Handoff</h3>
-        <p>Seamless escalation when AI detects complexity or frustration. Full conversation context transfers automatically.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon" style="background: var(--green-bg);">📊</div>
-        <h3>Live Analytics</h3>
-        <p>Real-time dashboards for resolution rates, sentiment, drop-offs, and prompt performance scoring.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon" style="background: var(--blue-bg);">🔗</div>
-        <h3>API &amp; Webhooks</h3>
-        <p>Connect CRM, payment gateways, ERP — agents pull data and trigger workflows mid-conversation.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon" style="background: var(--rose-bg);">🛡️</div>
-        <h3>Compliance Built-In</h3>
-        <p>PII masking, consent management, audit trails. SOC 2 ready, GDPR and DPDP Act compliant.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon" style="background: var(--accent-bg);">🌐</div>
-        <h3>50+ Languages</h3>
-        <p>Auto-detect and switch languages mid-chat. Hindi, Tamil, Bengali, English — your agent speaks them all.</p>
-      </div>
-    </div>
-  </section>
+<section id="channels"><div class="section-center"><div class="section-tag reveal">Channels</div><div class="section-title reveal">One agent, every touchpoint</div><div class="section-desc reveal">Deploy the same AI agent across website, WhatsApp, and RCS.</div></div><div class="channels-row"><div class="chan-card reveal"><div class="chan-icon" style="background:var(--accent)">W</div><h3>Website Chatbot</h3><p>Embed on any site with one script tag. Custom branding, rich media, file uploads.</p><div class="chan-stat">Core<small>Primary channel</small></div></div><div class="chan-card reveal"><div class="chan-icon" style="background:#25D366">WA</div><h3>WhatsApp Business</h3><p>Rich media, list messages, quick replies, document sharing, payments.</p><div class="chan-stat">2.3B+<small>Monthly active users</small></div></div><div class="chan-card reveal"><div class="chan-icon" style="background:#4285F4">R</div><h3>RCS Business</h3><p>App-like experience in native SMS. Carousels, rich cards, branded profiles.</p><div class="chan-stat">1.2B+<small>RCS-enabled devices</small></div></div></div></section>
 
-  <!-- CHANNELS -->
-  <section id="channels">
-    <div class="section-center">
-      <div class="section-tag reveal">Channels</div>
-      <div class="section-title reveal">Reach customers where<br>they already are</div>
-      <div class="section-desc reveal">Rich, interactive conversations on the world's most popular messaging platforms.</div>
-    </div>
-    <div class="channels-row">
-      <div class="chan-card wa reveal">
-        <div class="chan-icon">💬</div>
-        <h3>WhatsApp Business</h3>
-        <p>Rich media, list messages, quick replies, document sharing, and payment links — all within WhatsApp.</p>
-        <div class="chan-stat">2.3B+ <small>Monthly active users globally</small></div>
-      </div>
-      <div class="chan-card rcs reveal">
-        <div class="chan-icon">📱</div>
-        <h3>RCS Business Messaging</h3>
-        <p>App-like experiences in native SMS. Carousels, rich cards, branded profiles — no app download needed.</p>
-        <div class="chan-stat">1.2B+ <small>RCS-enabled devices worldwide</small></div>
-      </div>
-    </div>
-  </section>
+<section id="usecases" style="background:var(--warm)"><div class="section-center"><div class="section-tag reveal">Industries</div><div class="section-title reveal">Built for industries that<br>run on conversations</div><div class="section-desc reveal">From lead gen to post-sale support, one platform covers every vertical.</div></div><div class="uc-grid"><div class="uc-card reveal" onclick="openModal()"><div class="uc-tag" style="background:var(--accent-bg);color:var(--accent)">BFSI</div><h3>Loan and Insurance Automation</h3><p>Eligibility checks, document collection, EMI calculators, claims filing.</p></div><div class="uc-card reveal" onclick="openModal()"><div class="uc-tag" style="background:var(--orange-bg);color:var(--orange)">E-COMMERCE</div><h3>Order and Returns</h3><p>Order tracking, return initiation, refund status, product recommendations.</p></div><div class="uc-card reveal" onclick="openModal()"><div class="uc-tag" style="background:var(--green-bg);color:var(--green)">HEALTHCARE</div><h3>Patient Engagement</h3><p>Appointment booking, symptom screening, lab reports, medication reminders.</p></div><div class="uc-card reveal" onclick="openModal()"><div class="uc-tag" style="background:var(--teal-bg);color:var(--teal)">GOVERNMENT</div><h3>Citizen Services</h3><p>Scheme eligibility, application tracking, grievance redressal.</p></div><div class="uc-card reveal" onclick="openModal()"><div class="uc-tag" style="background:var(--rose-bg);color:var(--rose)">RETAIL</div><h3>In-Store and D2C</h3><p>Product discovery, store locator, loyalty programs, post-purchase support.</p></div><div class="uc-card reveal" onclick="openModal()"><div class="uc-tag" style="background:var(--accent-bg);color:var(--accent)">EDTECH</div><h3>Student Engagement</h3><p>Course discovery, enrollment, doubt resolution, assignment support.</p></div></div></section>
 
-  <!-- USE CASES -->
-  <section id="usecases" style="background: var(--bg-warm);">
-    <div class="section-center">
-      <div class="section-tag reveal">Industries</div>
-      <div class="section-title reveal">Built for industries that<br>run on conversations</div>
-      <div class="section-desc reveal">From lead gen to post-sale support — one platform, every vertical.</div>
-    </div>
-    <div class="uc-grid">
-      <div class="uc-card reveal" onclick="openModal()">
-        <div class="uc-tag">BFSI</div>
-        <h3>Loan &amp; Insurance Automation</h3>
-        <p>Eligibility checks, document collection, EMI calculators, claims filing, and payment reminders on WhatsApp.</p>
-      </div>
-      <div class="uc-card reveal" onclick="openModal()">
-        <div class="uc-tag">E-Commerce</div>
-        <h3>Order &amp; Returns</h3>
-        <p>Order tracking, return initiation, refund status, and personalized product recommendations conversationally.</p>
-      </div>
-      <div class="uc-card reveal" onclick="openModal()">
-        <div class="uc-tag">Healthcare</div>
-        <h3>Patient Engagement</h3>
-        <p>Appointment booking, symptom pre-screening, lab report delivery, and medication reminders.</p>
-      </div>
-      <div class="uc-card reveal" onclick="openModal()">
-        <div class="uc-tag">Government</div>
-        <h3>Citizen Services</h3>
-        <p>Scheme eligibility, application tracking, grievance redressal, and document submission via chat.</p>
-      </div>
-      <div class="uc-card reveal" onclick="openModal()">
-        <div class="uc-tag">Retail</div>
-        <h3>In-Store &amp; D2C</h3>
-        <p>Product discovery, store locator, loyalty programs, and post-purchase support on RCS &amp; WhatsApp.</p>
-      </div>
-      <div class="uc-card reveal" onclick="openModal()">
-        <div class="uc-tag">Electronics</div>
-        <h3>Warranty &amp; Support</h3>
-        <p>Product registration, warranty claims, troubleshooting guides, and service center scheduling.</p>
-      </div>
-    </div>
-  </section>
+<!-- KPI CALCULATOR -->
+<section class="kpi-section" id="calculator">
+<div class="section-center">
+<div class="section-tag reveal">ROI Calculator</div>
+<div class="section-title reveal">See what AgntPro.ai can<br>save your business</div>
+<div class="section-desc reveal">Select your industry, use cases, and channels. We will show you the numbers.</div>
+</div>
+<div class="kpi-wrap">
+<div class="kpi-progress"><div class="kpi-dot on" id="kd1"></div><div class="kpi-dot" id="kd2"></div><div class="kpi-dot" id="kd3"></div><div class="kpi-dot" id="kd4"></div></div>
+<div id="kpiStep1">
+<h3 class="kpi-step-title">Select your industry</h3>
+<p class="kpi-step-sub">We will tailor KPIs and benchmarks to your vertical.</p>
+<div class="kpi-ind-grid" id="kpiIndGrid"></div>
+<div class="kpi-btn-row"><div></div><button class="btn btn-primary" onclick="kpiNext(2)" id="kpiBtn1" disabled>Next: Select Use Cases</button></div>
+</div>
+<div id="kpiStep2" style="display:none">
+<h3 class="kpi-step-title" id="kpiUCTitle">Select use cases</h3>
+<p class="kpi-step-sub">Pick conversations to automate. More use cases = higher ROI.</p>
+<div id="kpiUCList" style="display:flex;flex-direction:column;gap:7px"></div>
+<div style="margin-top:10px;font-size:11px;color:var(--muted)" id="kpiUCCount"></div>
+<div class="kpi-btn-row"><button class="btn btn-secondary" onclick="kpiNext(1)">Back</button><button class="btn btn-primary" onclick="kpiNext(3)" id="kpiBtn2" disabled>Next: Choose Channels</button></div>
+</div>
+<div id="kpiStep3" style="display:none">
+<h3 class="kpi-step-title">Select deployment channels</h3>
+<p class="kpi-step-sub">Where should your AI agent operate?</p>
+<div class="kpi-ch-grid">
+<div class="kpi-ch" id="kpiChWeb" onclick="kpiToggleCh('website')"><div class="kpi-ch-icon" style="background:var(--accent)">W</div><div style="font-size:13px;font-weight:600">Website</div><div style="font-size:11px;color:var(--muted)">Your site</div></div>
+<div class="kpi-ch" id="kpiChWa" onclick="kpiToggleCh('whatsapp')"><div class="kpi-ch-icon" style="background:#25D366">WA</div><div style="font-size:13px;font-weight:600">WhatsApp</div><div style="font-size:11px;color:var(--muted)">2.3B+ users</div></div>
+<div class="kpi-ch" id="kpiChRcs" onclick="kpiToggleCh('rcs')"><div class="kpi-ch-icon" style="background:#4285F4">R</div><div style="font-size:13px;font-weight:600">RCS</div><div style="font-size:11px;color:var(--muted)">1.2B+ devices</div></div>
+</div>
+<div class="kpi-btn-row"><button class="btn btn-secondary" onclick="kpiNext(2)">Back</button><button class="btn btn-primary" onclick="kpiNext(4)" id="kpiBtn3" disabled>Next: Business Volume</button></div>
+</div>
+<div id="kpiStep4" style="display:none">
+<h3 class="kpi-step-title">Your business volume</h3>
+<p class="kpi-step-sub">Help us estimate your savings accurately.</p>
+<div class="kpi-slider-box"><div class="kpi-slider-row"><span class="kpi-slider-lbl">Daily customer conversations</span><span class="kpi-slider-val" id="kpiVolVal">500</span></div><input type="range" class="kpi-slider" min="50" max="10000" step="50" value="500" id="kpiVolSlider" oninput="document.getElementById('kpiVolVal').textContent=this.value"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint)"><span>50/day</span><span>10,000/day</span></div></div>
+<div class="kpi-slider-box"><div class="kpi-slider-row"><span class="kpi-slider-lbl">Current support team size</span><span class="kpi-slider-val" id="kpiAgVal">10</span></div><input type="range" class="kpi-slider" min="1" max="100" step="1" value="10" id="kpiAgSlider" oninput="document.getElementById('kpiAgVal').textContent=this.value"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint)"><span>1 agent</span><span>100 agents</span></div></div>
+<div class="kpi-btn-row"><button class="btn btn-secondary" onclick="kpiNext(3)">Back</button><button class="btn btn-primary" onclick="kpiCalc()">Calculate My ROI</button></div>
+</div>
+<div id="kpiStep5" style="display:none">
+<div class="kpi-big-save"><div style="font:600 10px/1 var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Estimated Annual Value</div><div id="kpiBigNum" style="font:700 42px/1 var(--mono);color:var(--green);letter-spacing:-1px"></div><div id="kpiBigSub" style="font-size:13px;color:var(--body);margin-top:6px"></div></div>
+<div class="kpi-result-grid" id="kpiResults"></div>
+<div class="kpi-cost-box" id="kpiCostBox"></div>
+<div class="kpi-cost-box" id="kpiTeamBox"></div>
+<div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-primary btn-lg" onclick="openModal()">Request Demo</button><button class="btn btn-green btn-lg" onclick="window.location.href='platform.html'">Launch Platform</button><button class="btn btn-secondary" onclick="kpiReset()">Recalculate</button></div>
+<div style="text-align:center;margin-top:16px;font-size:10px;color:var(--faint);line-height:1.5">Estimates based on industry benchmarks across 100+ deployments. Actual results may vary.</div>
+</div>
+</div>
+</section>
 
-  <!-- CTA -->
-  <section class="cta-section" id="cta">
-    <div class="section-center">
-      <div class="section-tag reveal">Get Started</div>
-      <h2 class="reveal">Ready to deploy your<br>first AI agent?</h2>
-      <p class="reveal" style="font-size: 17px; color: var(--text-body); max-width: 480px; margin: 0 auto 36px; line-height: 1.7;">Join 100+ enterprise teams already automating conversations on WhatsApp and RCS.</p>
-      <div class="cta-btns reveal">
-        <button class="btn btn-primary btn-large" onclick="openModal()">Request Early Access →</button>
-        <button class="btn btn-secondary btn-large" onclick="window.location.href='platform.html'" style="background: #10B981; color: white; border-color: #10B981;">▶ Launch Platform</button>
-        <button class="btn btn-secondary btn-large" onclick="showPage('about')">Meet the Founder</button>
-      </div>
-    </div>
-  </section>
+<section class="cta-section" id="cta"><div class="section-center"><div class="section-tag reveal">Get Started</div><h2 class="reveal">Ready to deploy your first AI agent?</h2><p class="reveal" style="font-size:16px;color:var(--body);max-width:480px;margin:0 auto 32px;line-height:1.7">Join enterprise teams automating conversations across website, WhatsApp, and RCS.</p><div class="cta-btns reveal"><button class="btn btn-primary btn-lg" onclick="openModal()">Request Demo</button><button class="btn btn-green btn-lg" onclick="window.location.href='platform.html'">Launch Platform</button><button class="btn btn-secondary btn-lg" onclick="showPage('about')">Meet the Founder</button></div></div></section>
 </div>
 
-<!-- ========== ABOUT PAGE ========== -->
-<div class="page" id="page-about">
-  <div class="about-page">
-    <div class="about-hero">
-      <div class="section-tag">About AgntPro.ai</div>
-      <div class="section-title" style="max-width: 600px;">Built by someone who's<br>lived the problem</div>
+<div class="page" id="page-about"><div class="about-page"><div class="about-hero"><div class="section-tag">About AgntPro.ai</div><div class="section-title" style="max-width:560px">Built by someone who has lived the problem</div><div class="about-grid"><div class="founder-card"><div class="founder-avatar">ND</div><h3>Nishant Dwivedi</h3><div class="founder-role">Founder and CEO, AgntPro.ai</div><p style="font-size:12px;color:var(--body);line-height:1.6">Solution Engineering leader with 7+ years building conversational AI for India's largest organizations.</p><div class="founder-stats"><div style="text-align:center"><div class="f-stat-val">100+</div><div class="f-stat-lbl">Agents Built</div></div><div style="text-align:center"><div class="f-stat-val">7+</div><div class="f-stat-lbl">Years Exp</div></div><div style="text-align:center"><div class="f-stat-val">50+</div><div class="f-stat-lbl">Clients</div></div><div style="text-align:center"><div class="f-stat-val">3</div><div class="f-stat-lbl">Channels</div></div></div><div class="founder-links"><a href="https://linkedin.com" target="_blank">LinkedIn</a><a href="/cdn-cgi/l/email-protection#d7b9bea4bfb6b9a397b6b0b9a3a7a5b8f9b6be">Email</a><a href="#" onclick="openModal();return false">Book a Call</a></div></div><div class="about-content"><h2>The story behind AgntPro.ai</h2><p>After 7+ years deploying WhatsApp, RCS, voice, and website chatbot solutions for top banks, retailers, and electronics giants, I saw one problem everywhere.</p><div class="highlight-box"><p><strong>Businesses spend months building conversation flows with drag-and-drop tools. By the time they go live, the use case has changed.</strong></p></div><p>I have built <strong>more than 100 AI-powered conversational agents</strong> for India's largest companies spanning BFSI, retail, and consumer electronics.</p><p>The bottleneck is not technology — <strong>it is the workflow.</strong> Businesses need a way to describe what they want in plain English and deploy across every channel.</p><h3>Clients</h3><div class="clients-grid"><div class="client-chip">Top 3 Private Banks</div><div class="client-chip">Leading Retail Chains</div><div class="client-chip">Electronics Majors</div><div class="client-chip">Government Bodies</div><div class="client-chip">Fintech Unicorns</div><div class="client-chip">Healthcare Networks</div></div><h3>Journey</h3><div class="timeline"><div class="tl-item"><div class="tl-year">2026 — Present</div><h4>Founder, AgntPro.ai</h4><p>Agentic AI for website, WhatsApp, and RCS.</p></div><div class="tl-item"><div class="tl-year">2021 — 2026</div><h4>Senior Consultant, Sinch India</h4><p>Enterprise CPaaS. 100+ agents across BFSI, Retail, Public Sector.</p></div><div class="tl-item"><div class="tl-year">2019 — 2021</div><h4>Solution Engineer, Decimal Technologies</h4><p>Digital lending platforms for banks.</p></div><div class="tl-item"><div class="tl-year">2017 — 2019</div><h4>ICICI Bank</h4><p>Banking operations. BFSI workflow expertise.</p></div></div><div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap"><button class="btn btn-primary btn-lg" onclick="openModal()">Request a Demo</button><button class="btn btn-green btn-lg" onclick="window.location.href='platform.html'">Launch Platform</button><button class="btn btn-secondary btn-lg" onclick="showPage('home')">Back to Home</button></div></div></div></div></div></div>
 
-      <div class="about-grid">
-        <!-- Founder Card -->
-        <div class="founder-card">
-          <div class="founder-avatar">ND</div>
-          <h3>Nishant Dwivedi</h3>
-          <div class="founder-role">Founder &amp; CEO, AgntPro.ai</div>
-          <p style="font-size: 13px; color: var(--text-body); line-height: 1.6;">
-            Solution Engineering leader with 7+ years building conversational AI and enterprise messaging solutions for India's largest organizations.
-          </p>
-          <div class="founder-stats">
-            <div class="f-stat">
-              <div class="f-stat-val">100+</div>
-              <div class="f-stat-lbl">Agents Built</div>
-            </div>
-            <div class="f-stat">
-              <div class="f-stat-val">7+</div>
-              <div class="f-stat-lbl">Years Experience</div>
-            </div>
-            <div class="f-stat">
-              <div class="f-stat-val">50+</div>
-              <div class="f-stat-lbl">Enterprise Clients</div>
-            </div>
-            <div class="f-stat">
-              <div class="f-stat-val">3</div>
-              <div class="f-stat-lbl">Verticals Deep</div>
-            </div>
-          </div>
-          <div class="founder-links">
-            <a href="https://linkedin.com" target="_blank">LinkedIn</a>
-            <a href="/cdn-cgi/l/email-protection#e08e899388818e94a081878e9490928fce8189">Email</a>
-            <a href="#" onclick="openModal(); return false;">Book a Call</a>
-          </div>
-        </div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal"><div id="modalForm"><div class="modal-head"><div><h3>Request a Demo</h3><p>We will respond within 24 hours</p></div><button class="modal-close" onclick="closeModal()">&#10005;</button></div><div class="modal-body"><div class="fg-row"><div class="fg"><label>First Name</label><input id="fName" placeholder="Rahul"></div><div class="fg"><label>Last Name</label><input placeholder="Sharma"></div></div><div class="fg"><label>Work Email</label><input type="email" id="fEmail" placeholder="rahul@company.com"></div><div class="fg"><label>Company</label><input placeholder="Your Company"></div><div class="fg-row"><div class="fg"><label>Industry</label><select><option value="">Select</option><option>BFSI</option><option>E-Commerce</option><option>Healthcare</option><option>EdTech</option><option>Government</option><option>Other</option></select></div><div class="fg"><label>Primary Channel</label><select><option value="">Select</option><option>Website Chatbot</option><option>WhatsApp</option><option>RCS</option><option>All</option></select></div></div><button class="btn btn-primary" style="width:100%;padding:12px 0;font-size:14px;margin-top:6px" onclick="submitForm()">Submit Request</button></div></div><div class="success-state" id="successState"><div class="success-icon">&#10003;</div><h3 style="font-size:18px;font-weight:700;margin-bottom:6px">You are on the list</h3><p style="font-size:13px;color:var(--body)">Our team will reach out within 24 hours.</p><button class="btn btn-secondary" style="margin-top:16px" onclick="closeModal()">Close</button></div></div></div>
 
-        <!-- About Content -->
-        <div class="about-content">
-          <h2>The story behind AgntPro.ai</h2>
-          <p>
-            After spending 7+ years in the trenches of enterprise messaging — deploying WhatsApp Business API, RCS, and voice solutions for India's top banks, leading retail chains, and electronics giants — I saw the same problem everywhere:
-          </p>
-
-          <div class="highlight-box">
-            <p><strong>Businesses spend months building conversation flows with drag-and-drop tools. By the time they go live, the use case has changed.</strong></p>
-          </div>
-
-          <p>
-            I've personally built and deployed <strong>more than 100 AI-powered conversational agents</strong> for some of India's largest companies — spanning BFSI, retail, and consumer electronics. These include top private sector banks, leading retail chains, and household electronics brands that millions of Indians interact with daily.
-          </p>
-
-          <p>
-            That experience taught me one thing: <strong>the bottleneck isn't the technology — it's the workflow.</strong> Flowchart-based builders are too rigid. Code-based solutions need engineering teams. What businesses actually need is a way to describe what they want in plain English and have an intelligent agent figure out the rest.
-          </p>
-
-          <p>That's exactly what AgntPro.ai does.</p>
-
-          <h3>Who I've worked with</h3>
-          <p>Over my career across Sinch, Decimal Technologies, and ICICI Bank, I've delivered solutions for:</p>
-
-          <div class="clients-grid">
-            <div class="client-chip">🏦 Top 3 Private Banks</div>
-            <div class="client-chip">🛒 Leading Retail Chains</div>
-            <div class="client-chip">📱 Electronics Majors</div>
-            <div class="client-chip">🏛️ Government Bodies</div>
-            <div class="client-chip">💳 Fintech Unicorns</div>
-            <div class="client-chip">🏥 Healthcare Networks</div>
-          </div>
-
-          <h3>My journey</h3>
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="tl-year">2026 — Present</div>
-              <h4>Founder &amp; CEO, AgntPro.ai</h4>
-              <p>Building the agentic AI platform that replaces flowcharts with prompts. Focusing on WhatsApp and RCS channels for Indian and global enterprises.</p>
-            </div>
-            <div class="timeline-item">
-              <div class="tl-year">2021 — 2026</div>
-              <h4>Senior Consultant — Solution Engineering, Sinch India</h4>
-              <p>Led presales and solution design for enterprise CPaaS — WhatsApp Business API, RCS, Voice, and AI Agents. Deployed 100+ agents across BFSI, Retail, and Public Sector. Managed key accounts including top Indian banks and retail giants.</p>
-            </div>
-            <div class="timeline-item">
-              <div class="tl-year">2019 — 2021</div>
-              <h4>Solution Engineer, Decimal Technologies</h4>
-              <p>Built digital lending and onboarding platforms for banks. Deep expertise in API integrations, CRM/ERP ecosystems, and compliance frameworks.</p>
-            </div>
-            <div class="timeline-item">
-              <div class="tl-year">2017 — 2019</div>
-              <h4>ICICI Bank</h4>
-              <p>Started in banking operations, developed deep understanding of BFSI workflows, customer journeys, and regulatory requirements — the foundation for everything that followed.</p>
-            </div>
-          </div>
-
-          <h3>The vision</h3>
-          <p>
-            AgntPro.ai is built on a simple belief: <strong>every business should be able to deploy a smart conversational agent as easily as writing an email.</strong> We're starting with WhatsApp and RCS — the channels India runs on — and expanding to every messaging platform businesses need.
-          </p>
-          <p>
-            We're currently in private beta with select enterprise partners. If you're interested in deploying AI agents on messaging channels, I'd love to talk.
-          </p>
-
-          <div style="margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap;">
-            <button class="btn btn-primary btn-large" onclick="openModal()">Request a Demo →</button>
-            <button class="btn btn-secondary btn-large" onclick="window.location.href='platform.html'" style="background: #10B981; color: white; border-color: #10B981;">▶ Launch Platform</button>
-            <button class="btn btn-secondary btn-large" onclick="showPage('home')">← Back to Home</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ========== DEMO MODAL ========== -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div id="modalForm">
-      <div class="modal-header">
-        <div>
-          <h3>Request a Demo</h3>
-          <p>We'll reach out within 24 hours</p>
-        </div>
-        <button class="modal-close" onclick="closeModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" id="fName" placeholder="Rahul">
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" id="lName" placeholder="Sharma">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Work Email *</label>
-          <input type="email" id="fEmail" placeholder="rahul@company.com">
-        </div>
-        <div class="form-group">
-          <label>Company Name *</label>
-          <input type="text" id="fCompany" placeholder="Your Company">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Industry</label>
-            <select id="fIndustry">
-              <option value="">Select...</option>
-              <option>BFSI</option>
-              <option>E-Commerce / Retail</option>
-              <option>Healthcare</option>
-              <option>EdTech</option>
-              <option>Government</option>
-              <option>Electronics / Consumer</option>
-              <option>Real Estate</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Channel Interest</label>
-            <select id="fChannel">
-              <option value="">Select...</option>
-              <option>WhatsApp</option>
-              <option>RCS</option>
-              <option>Both</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn btn-primary btn-large form-submit" onclick="submitForm()">Submit Request →</button>
-      </div>
-    </div>
-    <div class="success-state" id="successState">
-      <div class="success-icon">✓</div>
-      <h3>You're on the list!</h3>
-      <p>Thanks for your interest in AgntPro.ai. Our team will reach out within 24 hours to schedule your personalized demo.</p>
-      <button class="btn btn-secondary" style="margin-top: 20px;" onclick="closeModal()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <a class="logo" onclick="showPage('home')" style="font-size: 16px;">
-    <div class="logo-icon" style="width: 24px; height: 24px; font-size: 11px;">A</div>
-    <div class="logo-text">AgntPro<span>.ai</span></div>
-  </a>
-  <div class="footer-links">
-    <a href="#" onclick="showPage('about'); return false;">About</a>
-    <a href="#" onclick="openModal(); return false;">Contact</a>
-    <a href="#" onclick="scrollToSection('features'); return false;">Features</a>
-    <a href="#" onclick="openModal(); return false;">Request Demo</a>
-  </div>
-  <div>© 2026 AgntPro.ai. All rights reserved.</div>
-</footer>
+<footer><a class="logo" onclick="showPage('home')"><div class="logo-mark" style="width:22px;height:22px;font-size:10px">A</div><div class="logo-text" style="font-size:14px">AgntPro<span>.ai</span></div></a><div class="footer-links"><a href="#" onclick="showPage('about');return false">About</a><a href="#" onclick="openModal();return false">Contact</a><a href="#" onclick="scrollTo('features');return false">Features</a></div><div>2026 AgntPro.ai. All rights reserved.</div></footer>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // === NAV SCROLL ===
-  window.addEventListener('scroll', () => {
-    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 20);
-  });
+window.addEventListener('scroll',function(){document.getElementById('mainNav').classList.toggle('scrolled',window.scrollY>20)});
+var obs=new IntersectionObserver(function(entries){entries.forEach(function(e,i){if(e.isIntersecting){setTimeout(function(){e.target.classList.add('vis')},i*60);obs.unobserve(e.target)}})},{threshold:.08});
+function initReveals(){document.querySelectorAll('.reveal').forEach(function(el){if(!el.classList.contains('vis'))obs.observe(el)})}initReveals();
+function showPage(p){document.querySelectorAll('.page').forEach(function(pg){pg.classList.remove('active')});document.getElementById('page-'+p).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});setTimeout(initReveals,100)}
+function scrollTo(id){showPage('home');setTimeout(function(){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})},150)}
+function openModal(){document.getElementById('modalOverlay').classList.add('open');document.getElementById('modalForm').style.display='block';document.getElementById('successState').classList.remove('show');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow=''}
+function submitForm(){var n=document.getElementById('fName').value;var e=document.getElementById('fEmail').value;if(!n||!e){alert('Please fill in name and email.');return}document.getElementById('modalForm').style.display='none';document.getElementById('successState').classList.add('show')}
 
-  // === SCROLL REVEAL ===
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
-      if (e.isIntersecting) {
-        setTimeout(() => e.target.classList.add('vis'), i * 60);
-        obs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.08 });
+var industries={ecom:{name:"ShopEase Support",avatar:"S",color:"var(--accent)",prompt:"You are ShopEase's AI support agent. Help with order tracking, returns, product recommendations, size checks, delivery estimates.\n\nProducts: Sneakers Rs 2499, Denim Jacket Rs 3299, Earbuds Pro Rs 1899, Yoga Mat Rs 999.\n\nTone: Friendly, concise.",convos:[{from:'user',text:'Where is my order #ORD-78291?'},{from:'bot',text:'Let me check that.\n\nOrder #ORD-78291:\nClassic White Sneakers (Size 9)\nStatus: Out for delivery\nExpected: Today by 6 PM\nCarrier: BlueDart - AWB 4829103847\n\nWant the live tracking link?'},{from:'user',text:'Yes please'},{from:'bot',text:'Here is your tracking link:\nbluedart.com/track/4829103847\n\nYour delivery partner Ravi is 3 stops away. Anything else?'}],questions:["Where is my order #ORD-78291?","I want to return the jacket","Do you have sneakers in size 11?","My refund has not arrived"]},
+bfsi:{name:"QuickLoan Advisor",avatar:"Q",color:"#1D4ED8",prompt:"You are QuickLoan's advisor. Help with home loan eligibility, EMI calculations, document requirements.\n\nRates: 8.5% salaried, 9.2% self-employed.\nTone: Professional.",convos:[{from:'user',text:'Am I eligible for a home loan?'},{from:'bot',text:'I can check eligibility. Quick questions:\n\n1. Salaried or Self-employed?\n2. Monthly income?\n3. Existing EMIs?\n\nShare these and I will run the numbers.'},{from:'user',text:'Salaried, Rs 95000, no EMIs'},{from:'bot',text:'Based on your profile:\n\nEligibility: Up to Rs 52,00,000\nRate: 8.5% p.a.\nEMI for 50L/20yrs: Rs 43,391/month\n\nDocuments needed:\n- PAN card\n- 3 months salary slips\n- 6 months bank statement\n\nShall I start pre-approval?'}],questions:["Am I eligible for home loan?","Calculate EMI for Rs 40 lakhs","What documents needed?","Track application LA-20261"]},
+health:{name:"MedConnect",avatar:"M",color:"var(--teal)",prompt:"You are MedConnect's assistant. Help with appointments, doctor availability, lab reports.\n\nDepartments: Cardiology, Orthopedics, Dermatology, Pediatrics.\nTone: Warm, reassuring.",convos:[{from:'user',text:'Book appointment with cardiologist'},{from:'bot',text:'Available cardiologists:\n\nDr. Ananya Sharma - April 4, 10:30 AM\nDr. Rajeev Menon - April 5, 2:00 PM\nDr. Priya Gupta - April 7, 11:00 AM\n\nWhich works for you?'},{from:'user',text:'Dr Sharma on April 4'},{from:'bot',text:'Confirmed:\n\nDr. Ananya Sharma\nApril 4, 10:30 AM\nCardiology, Room 304\n\nArrive 15 min early with insurance card. SMS reminder will follow.'}],questions:["Book appointment with cardiologist","Are my lab reports ready?","What are visiting hours?","Reschedule my appointment"]},
+edu:{name:"LearnHub Guide",avatar:"L",color:"var(--orange)",prompt:"You are LearnHub's student assistant. Help with courses, enrollment, doubts.\n\nCourses: Full Stack Rs 12999, Data Science Rs 14999, UI/UX Rs 9999.\nTone: Encouraging.",convos:[{from:'user',text:'Which course for AI career?'},{from:'bot',text:'For AI, I recommend:\n\nData Science and ML - Rs 14,999\nDuration: 6 months\nCovers: Python, ML, Deep Learning, NLP\n5 industry projects\n92% placement rate\n\nWant the detailed syllabus?'},{from:'user',text:'Payment options?'},{from:'bot',text:'Payment plans:\n\nFull: Rs 14,999 (save Rs 2000)\nEMI: Rs 2,999/month x 6 (0% interest)\nScholarship: Up to 30% for merit\n\nShall I start enrollment?'}],questions:["Which course for AI?","Payment options?","Next batch date?","Download syllabus"]},
+real:{name:"PropAssist",avatar:"P",color:"var(--rose)",prompt:"You are PropAssist's agent. Help with property search, site visits, EMI estimates.\n\nListings: 2BHK Noida Rs 65L, 3BHK Greater Noida Rs 85L, Villa Rs 1.2Cr.",convos:[{from:'user',text:'3BHK under Rs 1 crore'},{from:'bot',text:'Matching properties:\n\n1. Skyline Heights, Greater Noida\n3BHK | 1450 sqft | Rs 85L | Ready\n\n2. Green Valley, Noida Sec-150\n3BHK | 1320 sqft | Rs 78L | Dec 2026\n\n3. Lotus Residency, Noida Ext\n3BHK | 1580 sqft | Rs 92L | Ready\n\nSchedule a site visit?'},{from:'user',text:'Visit Skyline Heights'},{from:'bot',text:'Visit scheduled:\n\nSkyline Heights, Greater Noida\nSaturday April 5, 11:00 AM\nContact: Arjun (Site Manager)\n\nBring ID proof. Maps link will follow.'}],questions:["3BHK under 1 crore","Schedule site visit","Home loan EMI?","Check RERA status"]},
+gov:{name:"JanSeva",avatar:"J",color:"var(--dark)",prompt:"You are JanSeva's citizen assistant. Help with schemes, applications, grievances.\n\nSchemes: PM Awas, Ayushman Bharat, PM Kisan.\nTone: Simple, respectful.",convos:[{from:'user',text:'PM Awas Yojana eligibility?'},{from:'bot',text:'PM Awas eligibility:\n\nEWS: Income up to Rs 3L\nLIG: Rs 3-6L\nMIG-I: Rs 6-12L\nMIG-II: Rs 12-18L\n\nConditions:\n- No pucca house owned\n- First-time buyer\n- Aadhaar linked to bank\n\nWhich category?'},{from:'user',text:'LIG'},{from:'bot',text:'LIG benefits:\n\nSubsidy: 6.5% on loan up to Rs 6L\nMax carpet area: 60 sqm\nAmount: Up to Rs 2,67,000\n\nDocuments: Aadhaar, income cert, bank details\n\nApply at nearest CSC or pmaymis.gov.in'}],questions:["PM Awas eligibility?","Track ration card","Ayushman Bharat docs","File grievance"]}};
 
-  function initReveals() {
-    document.querySelectorAll('.reveal').forEach(el => {
-      if (!el.classList.contains('vis')) obs.observe(el);
-    });
-  }
-  initReveals();
+var currentIndustry='ecom';
+function setIndustry(ind,btn){currentIndustry=ind;document.querySelectorAll('.ind-tab').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');var d=industries[ind];document.getElementById('promptInput').value=d.prompt;document.getElementById('prevName').textContent=d.name;document.getElementById('prevAvatar').textContent=d.avatar;document.getElementById('prevAvatar').style.background=d.color;var qqDiv=document.getElementById('quickQs');qqDiv.innerHTML='';d.questions.forEach(function(q){var b=document.createElement('button');b.className='qq';b.textContent=q;b.onclick=function(){document.getElementById('userInput').value=q;sendUser()};qqDiv.appendChild(b)});runDemo()}
+function setChannel(ch){document.getElementById('togWeb').className=ch==='web'?'ch-tab active-web':'ch-tab';document.getElementById('togWa').className=ch==='wa'?'ch-tab active-wa':'ch-tab';document.getElementById('togRcs').className=ch==='rcs'?'ch-tab active-rcs':'ch-tab'}
+function getTyping(body){var el=document.getElementById('typingDots');if(!el){el=document.createElement('div');el.id='typingDots';el.className='typing-ind';el.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div>';body.appendChild(el)}return el}
+function runDemo(){var body=document.getElementById('previewBody');body.innerHTML='';getTyping(body);playNext(industries[currentIndustry].convos,body,0)}
+function playNext(c,body,i){if(i>=c.length)return;var m=c[i];var t=getTyping(body);if(m.from==='bot'){t.classList.add('show');body.scrollTop=body.scrollHeight;setTimeout(function(){t.classList.remove('show');addBub(body,m.text,'bub-bot');setTimeout(function(){playNext(c,body,i+1)},500)},900)}else{addBub(body,m.text,'bub-user');setTimeout(function(){playNext(c,body,i+1)},400)}}
+function addBub(c,text,cls){var d=document.createElement('div');d.className='bub '+cls;d.textContent=text;var t=document.getElementById('typingDots');if(t&&t.parentNode===c)c.insertBefore(d,t);else c.appendChild(d);requestAnimationFrame(function(){d.classList.add('show')});c.scrollTop=c.scrollHeight}
+function sendUser(){var inp=document.getElementById('userInput');var text=inp.value.trim();if(!text)return;inp.value='';var body=document.getElementById('previewBody');getTyping(body);addBub(body,text,'bub-user');var t=getTyping(body);t.classList.add('show');body.scrollTop=body.scrollHeight;var rr=["Let me look into that for you.","Checking the details now.","Give me a moment.","Finding the best solution.","Here is what I found."];setTimeout(function(){t.classList.remove('show');addBub(body,rr[Math.floor(Math.random()*rr.length)],'bub-bot')},1100)}
+setIndustry('ecom',document.querySelector('.ind-tab'));
 
-  // === PAGE SWITCHING ===
-  function showPage(page) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('page-' + page);
-    target.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+// === KPI CALCULATOR ===
+var KPI_DATA={
+ecommerce:{label:"E-Commerce",icon:"EC",color:"#2563EB",uc:["Order tracking","Returns processing","Product recommendations","Size availability","Delivery delay resolution","Payment failure support","Loyalty program queries","COD to prepaid conversion","Cross-sell upsell","Abandoned cart recovery"],cac:35,csat:22,rt:85,res:87,cpm:45,cpa:4,conv:15,agCost:28000},
+bfsi:{label:"Banking and Finance",icon:"BF",color:"#1D4ED8",uc:["Loan eligibility checks","EMI calculator","Account balance queries","KYC document collection","Credit card queries","Fraud alert handling","Insurance claim filing","FD advisory","Repayment reminders","Branch ATM locator"],cac:40,csat:18,rt:90,res:82,cpm:65,cpa:6,conv:20,agCost:32000},
+healthcare:{label:"Healthcare",icon:"HC",color:"#0D9488",uc:["Appointment booking","Doctor availability","Lab report delivery","Medication reminders","Symptom pre-screening","Insurance pre-auth","Follow-up scheduling","Prescription refills","Hospital navigation","Billing queries"],cac:30,csat:25,rt:80,res:78,cpm:55,cpa:5,conv:12,agCost:30000},
+edtech:{label:"EdTech",icon:"ED",color:"#D97706",uc:["Course discovery","Enrollment support","Doubt resolution","Assignment help","Batch schedule queries","Certificate requests","Placement queries","Refund cancellation","Mentor booking","Trial to paid conversion"],cac:45,csat:20,rt:88,res:85,cpm:40,cpa:3,conv:25,agCost:25000},
+retail:{label:"Retail and FMCG",icon:"RT",color:"#E11D48",uc:["Store locator","Product availability","Loyalty points balance","Offer alerts","Complaint registration","Warranty claims","Bulk order inquiries","Feedback collection","New launch notifications","Personalized recommendations"],cac:32,csat:19,rt:82,res:84,cpm:38,cpa:4,conv:18,agCost:26000},
+realestate:{label:"Real Estate",icon:"RE",color:"#7C3AED",uc:["Property search matching","Site visit scheduling","EMI loan estimation","Document verification","RERA compliance queries","Payment milestone reminders","Construction updates","Referral program","Handover queries","Maintenance requests"],cac:50,csat:15,rt:75,res:72,cpm:120,cpa:8,conv:30,agCost:35000},
+government:{label:"Government",icon:"GV",color:"#475569",uc:["Scheme eligibility","Application tracking","Document guidance","Grievance registration","RTI assistance","Tax filing support","License renewals","Hearing notifications","Benefit queries","Digital literacy help"],cac:25,csat:30,rt:92,res:75,cpm:50,cpa:3,conv:0,agCost:22000},
+insurance:{label:"Insurance",icon:"IN",color:"#059669",uc:["Plan comparison","Premium calculation","Claim filing tracking","Renewal reminders","Nominee updates","Hospital network","Cashless pre-auth","Document upload","Policy cancellation","Agent booking"],cac:38,csat:21,rt:86,res:80,cpm:70,cpa:5,conv:22,agCost:30000},
+travel:{label:"Travel Hospitality",icon:"TR",color:"#0284C7",uc:["Booking changes","Status updates","Cancellation refunds","Itinerary suggestions","Visa queries","Loyalty redemption","Airport transfers","Travel insurance","Group bookings","Review collection"],cac:35,csat:24,rt:83,res:81,cpm:55,cpa:5,conv:16,agCost:28000},
+telecom:{label:"Telecom",icon:"TL",color:"#DC2626",uc:["Plan upgrade","Data balance check","Bill disputes","Network issue reports","SIM activation","Roaming plans","Device troubleshooting","Add-on services","Number portability","Connection cancellation"],cac:42,csat:17,rt:91,res:88,cpm:35,cpa:3,conv:10,agCost:24000}
+};
+var kpiInd=null,kpiUC=[],kpiCh=[];
 
-    document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
-    const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`);
-    if (activeLink) activeLink.classList.add('active');
+// Build industry grid
+(function(){var g=document.getElementById('kpiIndGrid');Object.keys(KPI_DATA).forEach(function(k){var d=KPI_DATA[k];var el=document.createElement('button');el.className='kpi-ind';el.setAttribute('data-key',k);el.innerHTML='<div class="kpi-ind-icon" style="background:'+d.color+'">'+d.icon+'</div>'+d.label;el.onclick=function(){kpiInd=k;kpiUC=[];document.querySelectorAll('.kpi-ind').forEach(function(e){e.classList.remove('sel')});el.classList.add('sel');document.getElementById('kpiBtn1').disabled=false};g.appendChild(el)})})();
 
-    setTimeout(initReveals, 100);
-  }
+function kpiNext(s){
+  for(var i=1;i<=5;i++){var el=document.getElementById('kpiStep'+i);if(el)el.style.display=i===s?'block':'none';var dot=document.getElementById('kd'+i);if(dot)dot.className=i<=s?'kpi-dot on':'kpi-dot'}
+  if(s===2&&kpiInd){var d=KPI_DATA[kpiInd];document.getElementById('kpiUCTitle').textContent='Select use cases for '+d.label;var list=document.getElementById('kpiUCList');list.innerHTML='';d.uc.forEach(function(uc){var el=document.createElement('div');el.className='kpi-uc';el.innerHTML='<div class="kpi-chk"></div>'+uc;el.onclick=function(){var idx=kpiUC.indexOf(uc);if(idx>=0)kpiUC.splice(idx,1);else kpiUC.push(uc);el.className=kpiUC.includes(uc)?'kpi-uc sel':'kpi-uc';el.querySelector('.kpi-chk').textContent=kpiUC.includes(uc)?'\u2713':'';document.getElementById('kpiUCCount').textContent=kpiUC.length+' of '+d.uc.length+' selected';document.getElementById('kpiBtn2').disabled=kpiUC.length<1};list.appendChild(el)});document.getElementById('kpiUCCount').textContent='0 of '+d.uc.length+' selected'}
+}
 
-  function scrollToSection(id) {
-    showPage('home');
-    setTimeout(() => {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
-  }
+function kpiToggleCh(ch){var idx=kpiCh.indexOf(ch);if(idx>=0)kpiCh.splice(idx,1);else kpiCh.push(ch);document.getElementById('kpiChWeb').className=kpiCh.includes('website')?'kpi-ch sel':'kpi-ch';document.getElementById('kpiChWa').className=kpiCh.includes('whatsapp')?'kpi-ch sel':'kpi-ch';document.getElementById('kpiChRcs').className=kpiCh.includes('rcs')?'kpi-ch sel':'kpi-ch';document.getElementById('kpiBtn3').disabled=kpiCh.length<1}
 
-  // === MODAL ===
-  function openModal() {
-    document.getElementById('modalOverlay').classList.add('open');
-    document.getElementById('modalForm').style.display = 'block';
-    document.getElementById('successState').classList.remove('show');
-    document.body.style.overflow = 'hidden';
-  }
+function kpiCalc(){
+  var d=KPI_DATA[kpiInd];var vol=parseInt(document.getElementById('kpiVolSlider').value);var ag=parseInt(document.getElementById('kpiAgSlider').value);
+  var ucF=Math.min(kpiUC.length/10,1);var mc=vol*30;var manC=mc*d.cpm;var aiC=mc*d.cpa;var mSave=manC-aiC;var aSave=mSave*12;
+  var agSaved=Math.floor((d.res/100)*ag*ucF);var agCSave=agSaved*d.agCost*12;var total=aSave+agCSave;
+  var cacR=Math.round(d.cac*ucF);var csatL=Math.round(d.csat*ucF);var resR=Math.round(d.res*ucF*0.95+5);var convL=Math.round(d.conv*ucF);
+  var roi=Math.round(total/(aiC*12+200000)*100);
 
-  function closeModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  document.getElementById('kpiBigNum').textContent='Rs '+(total/100000).toFixed(1)+'L';
+  document.getElementById('kpiBigSub').textContent='Total annual savings for '+d.label;
+  document.getElementById('kpiResults').innerHTML=[
+    ['#2563EB',cacR+'%','CAC Reduction'],['#059669','+'+csatL+'%','CSAT Improvement'],['#D97706',d.rt+'%','Faster Response'],
+    ['#0D9488',resR+'%','Auto-Resolution'],['#E11D48',convL+'%','Conversion Lift'],['#7C3AED',roi+'%','Year 1 ROI']
+  ].map(function(r){return '<div class="kpi-result-card"><div class="kpi-result-val" style="color:'+r[0]+'">'+r[1]+'</div><div class="kpi-result-lbl">'+r[2]+'</div></div>'}).join('');
 
-  function submitForm() {
-    const name = document.getElementById('fName').value;
-    const email = document.getElementById('fEmail').value;
-    if (!name || !email) {
-      alert('Please fill in at least your name and email.');
-      return;
-    }
-    document.getElementById('modalForm').style.display = 'none';
-    document.getElementById('successState').classList.add('show');
-  }
+  document.getElementById('kpiCostBox').innerHTML='<h4 style="font-size:14px;font-weight:600;margin-bottom:12px">Cost Breakdown</h4><div class="kpi-cost-grid"><div><div class="kpi-cost-tag" style="color:var(--rose)">Without AgntPro</div><div class="kpi-cost-line">Rs '+d.cpm+' per conversation<br>'+mc.toLocaleString()+' conversations/month<br><strong>Monthly: Rs '+(mc*d.cpm).toLocaleString()+'</strong></div></div><div><div class="kpi-cost-tag" style="color:var(--green)">With AgntPro</div><div class="kpi-cost-line">Rs '+d.cpa+' per conversation<br>'+mc.toLocaleString()+' conversations/month<br><strong style="color:var(--green)">Monthly: Rs '+(mc*d.cpa).toLocaleString()+'</strong></div></div></div><div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:600">Monthly Savings</span><span style="font:700 18px/1 var(--mono);color:var(--green)">Rs '+mSave.toLocaleString()+'</span></div>';
 
-  // === DEMO CHAT ===
-  var currentCh = 'wa';
-  var demoConvos = {
-    wa: [
-      { from: 'user', text: 'Hi, I want to check my home loan eligibility' },
-      { from: 'bot', text: "Welcome to QuickBank!\n\nI can check your eligibility in 2 minutes. What's your net monthly income?" },
-      { from: 'user', text: '85,000 per month' },
-      { from: 'bot', text: "Great! Based on 85K/month, you may be eligible for:\n\nUp to 45,00,000\n8.5% p.a. interest rate\nEMI: ~38,700/month (20 yrs)\n\nWant to start a full application?" },
-      { from: 'user', text: 'Yes please!' },
-      { from: 'bot', text: "Perfect! Please share a photo of your PAN card to begin KYC.\n\nI'll verify it instantly and we can proceed to document upload." }
-    ],
-    rcs: [
-      { from: 'user', text: 'Show me your insurance plans' },
-      { from: 'bot', text: "Here are our top plans:\n\nEssential - 499/mo\nPremium - 899/mo\nFamily - 1,299/mo\n\nWhich one interests you?" },
-      { from: 'user', text: 'Premium sounds good' },
-      { from: 'bot', text: "Premium Plan includes:\n- 10L sum insured\n- Cashless at 8,000+ hospitals\n- Zero waiting for accidents\n- Free annual health check\n\nReady to enroll? It takes 3 min!" },
-      { from: 'user', text: "Let's do it" },
-      { from: 'bot', text: "I'll need your Aadhaar for instant KYC. This is 100% secure and encrypted.\n\nPlease type your 12-digit Aadhaar number." }
-    ]
-  };
+  document.getElementById('kpiTeamBox').innerHTML='<h4 style="font-size:14px;font-weight:600;margin-bottom:8px">Team Optimization</h4><div style="font-size:13px;color:var(--body);line-height:1.8">With '+resR+'% auto-resolution, <strong>'+agSaved+' of '+ag+' agents</strong> can focus on high-value tasks<br>Annual team savings: <strong style="color:var(--green)">Rs '+(agCSave/100000).toFixed(1)+'L</strong></div>';
+  kpiNext(5);
+}
 
-  var chatActive = false;
-
-  function setChannel(ch) {
-    currentCh = ch;
-    var togWa = document.getElementById('togWa');
-    var togRcs = document.getElementById('togRcs');
-    if (togWa) togWa.className = (ch === 'wa') ? 'ch-toggle active-wa' : 'ch-toggle';
-    if (togRcs) togRcs.className = (ch === 'rcs') ? 'ch-toggle active-rcs' : 'ch-toggle';
-
-    var avatar = document.getElementById('phoneAvatar');
-    if (avatar) {
-      avatar.className = (ch === 'wa') ? 'phone-avatar wa-bg' : 'phone-avatar rcs-bg';
-      avatar.textContent = (ch === 'wa') ? '🏦' : '🛡';
-    }
-    var agentName = document.getElementById('phoneAgentName');
-    if (agentName) agentName.textContent = (ch === 'wa') ? 'QuickBank' : 'SecureLife';
-
-    runDemo();
-  }
-
-  function getOrCreateTyping(body) {
-    var el = document.getElementById('typingDots');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'typingDots';
-      el.className = 'typing-indicator';
-      el.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-      body.appendChild(el);
-    }
-    return el;
-  }
-
-  function runDemo() {
-    var body = document.getElementById('phoneChat');
-    if (!body) return;
-    body.innerHTML = '';
-    getOrCreateTyping(body);
-    chatActive = true;
-    playNext(demoConvos[currentCh], body, 0);
-  }
-
-  function playNext(convo, body, idx) {
-    if (idx >= convo.length) { chatActive = false; return; }
-    var msg = convo[idx];
-    var typing = getOrCreateTyping(body);
-
-    if (msg.from === 'bot') {
-      typing.classList.add('show');
-      body.scrollTop = body.scrollHeight;
-      setTimeout(function() {
-        typing.classList.remove('show');
-        addBubble(body, msg.text, 'bot-bubble');
-        setTimeout(function() { playNext(convo, body, idx + 1); }, 600);
-      }, 900);
-    } else {
-      addBubble(body, msg.text, 'user-bubble');
-      setTimeout(function() { playNext(convo, body, idx + 1); }, 500);
-    }
-  }
-
-  function addBubble(container, text, cls) {
-    var div = document.createElement('div');
-    div.className = 'bubble ' + cls;
-    div.textContent = text;
-    var typing = document.getElementById('typingDots');
-    if (typing && typing.parentNode === container) {
-      container.insertBefore(div, typing);
-    } else {
-      container.appendChild(div);
-    }
-    requestAnimationFrame(function() { div.classList.add('show'); });
-    container.scrollTop = container.scrollHeight;
-  }
-
-  function sendUserMsg() {
-    var input = document.getElementById('userMsgInput');
-    if (!input) return;
-    var text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-
-    var body = document.getElementById('phoneChat');
-    if (!body) return;
-    getOrCreateTyping(body);
-    addBubble(body, text, 'user-bubble');
-
-    var typing = getOrCreateTyping(body);
-    typing.classList.add('show');
-    body.scrollTop = body.scrollHeight;
-
-    var replies = [
-      "I'd be happy to help with that! Let me pull up your details. One moment please...",
-      "Great question! Based on our records, I can assist you right away.",
-      "Absolutely! I've processed your request. Is there anything else I can help with?",
-      "Thanks for sharing that. Let me verify this information and get back to you.",
-      "I understand. Let me check the best options available for you based on your profile."
-    ];
-
-    setTimeout(function() {
-      typing.classList.remove('show');
-      var reply = replies[Math.floor(Math.random() * replies.length)];
-      addBubble(body, reply, 'bot-bubble');
-    }, 1200);
-  }
+function kpiReset(){kpiInd=null;kpiUC=[];kpiCh=[];document.querySelectorAll('.kpi-ind').forEach(function(e){e.classList.remove('sel')});document.querySelectorAll('.kpi-ch').forEach(function(e){e.classList.remove('sel')});document.getElementById('kpiBtn1').disabled=true;kpiNext(1)}
 </script>
-
 </body>
 </html>

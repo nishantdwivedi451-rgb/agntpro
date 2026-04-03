@@ -4,894 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AgntPro.ai — Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body, #root { height: 100%; overflow: hidden; }
-  body { font-family: 'Outfit', sans-serif; background: #F8F7FC; color: #1A1035; -webkit-font-smoothing: antialiased; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-5px); opacity: 1; } }
-  * { scrollbar-width: thin; scrollbar-color: #E8E5F0 transparent; }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #E8E5F0; border-radius: 3px; }
-  input:focus, textarea:focus { border-color: #8B5CF6 !important; outline: none; }
-  button { font-family: 'Outfit', sans-serif; }
-  button:hover { opacity: 0.92; }
+*{margin:0;padding:0;box-sizing:border-box}html,body,#root{height:100%;overflow:hidden}body{font-family:'Sora',sans-serif;background:#F8F7FC;color:#141210;-webkit-font-smoothing:antialiased}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}@keyframes spin{to{transform:rotate(360deg)}}*{scrollbar-width:thin;scrollbar-color:#E6E3DC transparent}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#E6E3DC;border-radius:3px}input:focus,textarea:focus{border-color:#2563EB!important;outline:none}button{font-family:'Sora',sans-serif;cursor:pointer}button:hover{opacity:.92}.spinner{width:20px;height:20px;border:2px solid rgba(37,99,235,.2);border-top-color:#2563EB;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
+const{useState,useRef,useEffect}=React;
+const API_BASE=window.location.hostname==="localhost"?"http://localhost:8080":"https://agntpro-api-XXXXX-el.a.run.app";
 
-// ============================================================
-// PRESET AGENTS
-// ============================================================
-const PRESET_AGENTS = {
-  ecommerce: {
-    name: "ShopEase Support",
-    prompt: "You are ShopEase's AI customer support agent on WhatsApp. You help customers with:\n- Order tracking and status updates\n- Returns and refund processing\n- Product recommendations based on preferences\n- Size/color availability checks\n- Delivery time estimates\n- Complaint resolution\n\nTone: Friendly, efficient, empathetic. Use emojis sparingly. Keep responses concise for WhatsApp.\nRules: Never share other customer data. Escalate billing disputes over ₹5000 to human agents. Always confirm order IDs before sharing details.\n\nSample product catalog:\n- Classic White Sneakers (SKU: SNK-001) — ₹2,499, sizes 6-12\n- Denim Jacket (SKU: JKT-042) — ₹3,299, S/M/L/XL\n- Wireless Earbuds Pro (SKU: AUD-015) — ₹1,899\n- Yoga Mat Premium (SKU: FIT-008) — ₹999\n\nOrder statuses: Use realistic Indian city names and delivery timelines (2-5 business days).",
-    channel: "whatsapp", avatar: "🛍️", color: "#8B5CF6"
-  },
-  bfsi: {
-    name: "QuickLoan Advisor",
-    prompt: "You are QuickLoan's AI advisor on WhatsApp. You help users with:\n- Home loan eligibility checks based on income\n- EMI calculations and comparisons\n- Document requirements for loan applications\n- Application status tracking\n- Interest rate information\n\nTone: Professional yet approachable. Use clear numbers and breakdowns.\nRules: Never guarantee loan approval. Always mention that final approval depends on verification. Comply with RBI guidelines.",
-    channel: "whatsapp", avatar: "🏦", color: "#3B82F6"
-  },
-  insurance: {
-    name: "SecureLife Agent",
-    prompt: "You are SecureLife's insurance advisor on WhatsApp. You help with:\n- Plan comparisons (Essential ₹499/mo, Premium ₹899/mo, Family ₹1299/mo)\n- Claim filing assistance\n- Policy renewal reminders\n- Coverage explanations\n- Hospital network queries\n\nTone: Reassuring, clear, patient. Break down complex terms simply.\nRules: Never provide medical advice. Always recommend consulting a doctor for health queries.",
-    channel: "whatsapp", avatar: "🛡️", color: "#10B981"
-  }
-};
+async function api(p,o={}){const t=localStorage.getItem("agntpro_token");const h={...(o.headers||{})};if(t)h["Authorization"]="Bearer "+t;if(!(o.body instanceof FormData))h["Content-Type"]="application/json";try{const r=await fetch(API_BASE+p,{...o,headers:h});const d=await r.json();if(r.status===401){localStorage.clear();window.location.reload();return{error:"Session expired"}}if(!r.ok)return{error:d.error||"Failed"};return d}catch(e){return{error:"Network error"}}}
 
-// ============================================================
-// MAIN APP
-// ============================================================
-function App() {
-  const [currentView, setCurrentView] = useState("agents");
-  const [agents, setAgents] = useState([
-    { id: "agent-1", ...PRESET_AGENTS.ecommerce, knowledgeBase: [], conversations: [], createdAt: Date.now() },
-  ]);
-  const [activeAgentId, setActiveAgentId] = useState("agent-1");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+function App(){const[user,setUser]=useState(null);const[ld,setLd]=useState(true);useEffect(()=>{const t=localStorage.getItem("agntpro_token");const u=localStorage.getItem("agntpro_user");if(t&&u)setUser(JSON.parse(u));setLd(false)},[]);if(ld)return<Ld/>;if(!user)return<Auth onLogin={(u,t)=>{localStorage.setItem("agntpro_token",t);localStorage.setItem("agntpro_user",JSON.stringify(u));setUser(u)}}/>;return<Dash user={user} onLogout={()=>{localStorage.clear();setUser(null)}}/>}
+function Ld(){return<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><div className="spinner" style={{width:32,height:32,borderWidth:3}}/></div>}
 
-  const activeAgent = agents.find(a => a.id === activeAgentId);
+function Auth({onLogin}){const[mode,setMode]=useState("login");const[email,setEmail]=useState("");const[pw,setPw]=useState("");const[name,setName]=useState("");const[co,setCo]=useState("");const[err,setErr]=useState("");const[ld,setLd]=useState(false);
+async function go(){setErr("");setLd(true);const d=await api(mode==="login"?"/api/auth/login":"/api/auth/signup",{method:"POST",body:JSON.stringify(mode==="login"?{email,password:pw}:{email,password:pw,name,company:co})});if(d.error){setErr(d.error);setLd(false);return}onLogin(d.user,d.token)}
+return(<div style={{display:"flex",height:"100vh",background:"linear-gradient(135deg,#EFF6FF 0%,#F0FDFA 50%,#FAFAF8 100%)"}}>
+<div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",padding:"0 80px"}}>
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:40}}><div style={{width:40,height:40,borderRadius:10,background:"#2563EB",color:"#fff",fontSize:18,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'IBM Plex Mono'"}}>A</div><span style={{fontFamily:"'IBM Plex Mono'",fontSize:26,fontWeight:700}}>AgntPro<span style={{color:"#2563EB"}}>.ai</span></span></div>
+<h1 style={{fontSize:42,fontWeight:800,lineHeight:1.1,letterSpacing:-1.5,marginBottom:14}}>AI Agents for<br/><span style={{background:"linear-gradient(135deg,#2563EB,#0D9488)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Every Channel</span></h1>
+<p style={{fontSize:17,color:"#3D3A34",lineHeight:1.7,maxWidth:420}}>Deploy chatbots on your website, WhatsApp, and RCS. Just write a prompt.</p>
+<div style={{display:"flex",gap:28,marginTop:36}}>{[["100+","Agents"],["3","Channels"],["89%","Resolution"]].map(([v,l],i)=>(<div key={i}><div style={{fontSize:22,fontWeight:700,fontFamily:"'IBM Plex Mono'",color:"#2563EB"}}>{v}</div><div style={{fontSize:11,color:"#8A8680",marginTop:2}}>{l}</div></div>))}</div>
+</div>
+<div style={{width:460,display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+<div style={{width:"100%",maxWidth:380,background:"#fff",borderRadius:16,padding:32,boxShadow:"0 16px 48px rgba(20,18,16,.08)",border:"1px solid #E6E3DC"}}>
+<h2 style={{fontSize:20,fontWeight:700,marginBottom:4}}>{mode==="login"?"Welcome back":"Create account"}</h2>
+<p style={{fontSize:13,color:"#8A8680",marginBottom:22}}>{mode==="login"?"Sign in to your dashboard":"Start building agents in minutes"}</p>
+{err&&<div style={{background:"#FFF1F2",border:"1px solid #FECDD3",borderRadius:8,padding:"8px 12px",marginBottom:14,fontSize:12,color:"#E11D48"}}>{err}</div>}
+{mode==="signup"&&<><div style={{marginBottom:12}}><label style={lbl}>Full Name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Nishant Dwivedi" style={inp}/></div><div style={{marginBottom:12}}><label style={lbl}>Company</label><input value={co} onChange={e=>setCo(e.target.value)} placeholder="AgntPro.ai" style={inp}/></div></>}
+<div style={{marginBottom:12}}><label style={lbl}>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="nishant@agntpro.ai" style={inp}/></div>
+<div style={{marginBottom:18}}><label style={lbl}>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Min 6 characters" style={inp} onKeyDown={e=>{if(e.key==="Enter")go()}}/></div>
+<button onClick={go} disabled={ld} style={{...bp,width:"100%",padding:"12px 0",fontSize:14,opacity:ld?.7:1}}>{ld?<span className="spinner" style={{width:16,height:16,borderWidth:2}}/>:(mode==="login"?"Sign In":"Create Account")}</button>
+<div style={{textAlign:"center",marginTop:18,fontSize:12,color:"#8A8680"}}>{mode==="login"?"No account? ":"Have an account? "}<button onClick={()=>{setMode(mode==="login"?"signup":"login");setErr("")}} style={{background:"none",border:"none",color:"#2563EB",fontWeight:600,fontSize:12,cursor:"pointer"}}>{mode==="login"?"Sign Up":"Sign In"}</button></div>
+</div></div></div>)}
 
-  function updateAgent(id, updates) {
-    setAgents(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
-  }
+function Dash({user,onLogout}){const[view,setView]=useState("agents");const[agents,setAgents]=useState([]);const[aid,setAid]=useState(null);const[showC,setShowC]=useState(false);const[col,setCol]=useState(false);const[ldA,setLdA]=useState(true);
+useEffect(()=>{load()},[]);
+async function load(){setLdA(true);const d=await api("/api/agents");if(d.agents){setAgents(d.agents);if(d.agents.length>0&&!aid)setAid(d.agents[0]._id)}setLdA(false)}
+async function create(t){const temps={ecommerce:{name:"ShopEase Support",avatar:"S",color:"#2563EB",prompt:"You are ShopEase's AI support agent. Help with orders, returns, products.\n\nTone: Friendly, concise."},bfsi:{name:"QuickLoan Advisor",avatar:"Q",color:"#1D4ED8",prompt:"You are QuickLoan's advisor. Help with loans, EMI, documents.\n\nTone: Professional."},insurance:{name:"SecureLife Agent",avatar:"SL",color:"#059669",prompt:"You are SecureLife's advisor. Plans: Essential Rs499, Premium Rs899, Family Rs1299.\n\nTone: Reassuring."}};const p=temps[t]||temps.ecommerce;const d=await api("/api/agents",{method:"POST",body:JSON.stringify(p)});if(d.agent){setAgents(prev=>[d.agent,...prev]);setAid(d.agent._id);setShowC(false);setView("chat")}}
+async function del(id){if(agents.length<=1)return;await api("/api/agents/"+id,{method:"DELETE"});setAgents(prev=>prev.filter(a=>a._id!==id));if(aid===id)setAid(agents.find(a=>a._id!==id)?._id)}
+const act=agents.find(a=>a._id===aid);const sw=col?64:240;
 
-  function createAgent(preset) {
-    const data = PRESET_AGENTS[preset] || PRESET_AGENTS.ecommerce;
-    const newAgent = { id: "agent-" + Date.now(), ...data, knowledgeBase: [], conversations: [], createdAt: Date.now() };
-    setAgents(prev => [...prev, newAgent]);
-    setActiveAgentId(newAgent.id);
-    setShowCreateModal(false);
-    setCurrentView("chat");
-  }
+return(<div style={{display:"flex",height:"100vh",overflow:"hidden"}}>
+<div style={{width:sw,minWidth:sw,background:"#fff",borderRight:"1px solid #E6E3DC",display:"flex",flexDirection:"column",transition:"all .25s",overflow:"hidden",flexShrink:0}}>
+<div style={{padding:14,display:"flex",alignItems:"center",justifyContent:"space-between",borderBottom:"1px solid #F0EEE8",minHeight:56}}>
+{!col&&<a href="index.html" style={{display:"flex",alignItems:"center",gap:6,textDecoration:"none"}}><div style={{width:24,height:24,borderRadius:6,background:"#2563EB",color:"#fff",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'IBM Plex Mono'"}}>A</div><span style={{fontFamily:"'IBM Plex Mono'",fontSize:14,fontWeight:700,color:"#141210",letterSpacing:-.5}}>AgntPro<span style={{color:"#2563EB"}}>.ai</span></span></a>}
+<button onClick={()=>setCol(!col)} style={{width:26,height:26,borderRadius:6,border:"1px solid #E6E3DC",background:"transparent",fontSize:11,color:"#8A8680",display:"flex",alignItems:"center",justifyContent:"center"}}>{col?"▸":"◂"}</button></div>
+<div style={{padding:"10px 6px",display:"flex",flexDirection:"column",gap:2}}>
+{[{id:"agents",icon:"A",l:"My Agents"},{id:"chat",icon:"C",l:"Test Chat"},{id:"knowledge",icon:"K",l:"Knowledge Base"},{id:"channels",icon:"CH",l:"Channels"},{id:"settings",icon:"S",l:"Settings"},{id:"analytics",icon:"AN",l:"Analytics"}].map(i=>(<button key={i.id} onClick={()=>setView(i.id)} title={i.l} style={{display:"flex",alignItems:"center",gap:9,border:"none",borderRadius:8,fontSize:13,fontWeight:view===i.id?600:500,color:view===i.id?"#2563EB":"#3D3A34",background:view===i.id?"#EFF6FF":"transparent",padding:col?10:"9px 14px",justifyContent:col?"center":"flex-start",transition:"all .15s",textAlign:"left"}}><span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,fontWeight:700,width:24,height:24,borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",background:view===i.id?"#2563EB":"#F0EEE8",color:view===i.id?"#fff":"#8A8680",flexShrink:0}}>{i.icon}</span>{!col&&<span style={{whiteSpace:"nowrap"}}>{i.l}</span>}</button>))}
+</div>
+{!col&&<div style={{flex:1,padding:"10px 6px",borderTop:"1px solid #F0EEE8",overflow:"auto",display:"flex",flexDirection:"column"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 8px",marginBottom:6}}><span style={{fontSize:10,fontWeight:700,color:"#B5B1AA",letterSpacing:1.5,fontFamily:"'IBM Plex Mono'"}}>AGENTS</span><button onClick={()=>setShowC(true)} style={{width:20,height:20,borderRadius:5,border:"1px solid #E6E3DC",background:"transparent",fontSize:13,color:"#2563EB",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button></div>
+{agents.map(a=>(<button key={a._id} onClick={()=>{setAid(a._id);setView("chat")}} style={{display:"flex",alignItems:"center",gap:9,width:"100%",padding:"8px 10px",border:"none",borderRadius:8,background:aid===a._id?"#EFF6FF":"transparent",textAlign:"left",fontSize:12}}><span style={{fontFamily:"'IBM Plex Mono'",fontWeight:700,width:28,height:28,borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",background:a.color||"#2563EB",color:"#fff",fontSize:11,flexShrink:0}}>{a.avatar}</span><div style={{flex:1,overflow:"hidden"}}><div style={{fontSize:12,fontWeight:600,color:"#141210",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{a.name}</div></div></button>))}
+<div style={{marginTop:"auto",padding:"10px 8px",borderTop:"1px solid #F0EEE8"}}><div style={{fontSize:11,color:"#8A8680",marginBottom:4}}>{user.name}</div><button onClick={onLogout} style={{fontSize:11,color:"#E11D48",background:"none",border:"none",fontWeight:600}}>Sign Out</button></div></div>}
+</div>
 
-  function deleteAgent(id) {
-    if (agents.length <= 1) return;
-    setAgents(prev => prev.filter(a => a.id !== id));
-    if (activeAgentId === id) setActiveAgentId(agents.find(a => a.id !== id)?.id);
-  }
+<div style={{flex:1,overflow:"auto",background:"#F8F7FC"}}>
+{ldA?<Ld/>:agents.length===0?<div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100%",padding:40,textAlign:"center"}}><div style={{fontSize:48,marginBottom:16,fontFamily:"'IBM Plex Mono'",color:"#B5B1AA"}}>+</div><h2 style={{fontSize:22,fontWeight:700,marginBottom:8}}>Create your first AI agent</h2><p style={{fontSize:14,color:"#8A8680",maxWidth:380,lineHeight:1.7,marginBottom:24}}>Deploy an AI chatbot on your website, WhatsApp, or RCS in minutes.</p><button onClick={()=>setShowC(true)} style={{...bp,padding:"12px 32px",fontSize:15}}>Create Agent</button></div>:<>
+{view==="agents"&&<AV agents={agents} aid={aid} onSel={id=>{setAid(id);setView("chat")}} onNew={()=>setShowC(true)} onDel={del}/>}
+{view==="chat"&&act&&<CV agent={act}/>}
+{view==="knowledge"&&act&&<KV agent={act} rl={load}/>}
+{view==="channels"&&act&&<ChV agent={act} rl={load}/>}
+{view==="settings"&&act&&<SV agent={act} rl={load}/>}
+{view==="analytics"&&act&&<StV agent={act}/>}
+</>}
+</div>
+{showC&&<Mod onClose={()=>setShowC(false)} title="Create Agent"><p style={{fontSize:13,color:"#8A8680",marginBottom:20}}>Choose a template.</p><div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>{[["ecommerce","S","ShopEase","E-COM"],["bfsi","Q","QuickLoan","BFSI"],["insurance","SL","SecureLife","INSURE"]].map(([k,av,nm,tg])=>(<button key={k} onClick={()=>create(k)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,padding:"20px 14px",border:"1.5px solid #E6E3DC",borderRadius:12,background:"#fff"}}><span style={{fontFamily:"'IBM Plex Mono'",fontWeight:700,width:40,height:40,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",background:"#2563EB",color:"#fff",fontSize:14}}>{av}</span><span style={{fontSize:12,fontWeight:600}}>{nm}</span><span style={{fontSize:9,fontWeight:700,color:"#2563EB",letterSpacing:1,fontFamily:"'IBM Plex Mono'"}}>{tg}</span></button>))}</div></Mod>}
+</div>)}
 
-  const sw = sidebarCollapsed ? 68 : 260;
+function AV({agents,aid,onSel,onNew,onDel}){return(<div style={{padding:"24px 28px",maxWidth:1100}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:24}}><div><h1 style={{fontSize:24,fontWeight:700,letterSpacing:-.5,marginBottom:4}}>My Agents</h1><p style={{fontSize:13,color:"#8A8680"}}>Manage AI agents</p></div><button onClick={onNew} style={bp}>+ Create Agent</button></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:16}}>{agents.map(a=>(<div key={a._id} style={{background:"#fff",borderRadius:14,border:"1.5px solid "+(aid===a._id?"#2563EB":"#E6E3DC"),padding:22}}><div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}><div style={{width:44,height:44,borderRadius:12,background:a.color||"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'IBM Plex Mono'",fontWeight:700,fontSize:14}}>{a.avatar}</div><div style={{flex:1}}><h3 style={{fontSize:16,fontWeight:600}}>{a.name}</h3></div></div><p style={{fontSize:12,color:"#8A8680",lineHeight:1.6,marginBottom:14}}>{a.prompt?.slice(0,100)}...</p><div style={{display:"flex",gap:8}}><button onClick={()=>onSel(a._id)} style={bs}>Test Chat</button>{agents.length>1&&<button onClick={()=>onDel(a._id)} style={{...bs,background:"#FFF1F2",color:"#E11D48"}}>Delete</button>}</div></div>))}<button onClick={onNew} style={{background:"#fff",borderRadius:14,border:"2px dashed #E6E3DC",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:180,gap:6}}><span style={{fontSize:28,color:"#B5B1AA"}}>+</span><span style={{fontSize:13,color:"#8A8680"}}>New Agent</span></button></div></div>)}
 
-  return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#F8F7FC" }}>
-      {/* SIDEBAR */}
-      <div style={{ width: sw, minWidth: sw, background: "#fff", borderRight: "1px solid #E8E5F0", display: "flex", flexDirection: "column", transition: "all 0.25s", overflow: "hidden", flexShrink: 0 }}>
-        <div style={{ padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #F0EEF5", minHeight: 60 }}>
-          {!sidebarCollapsed && (
-            <a href="index.html" style={{ display: "flex", alignItems: "center", gap: 7, textDecoration: "none" }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: "#8B5CF6", color: "#fff", fontSize: 13, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'JetBrains Mono', monospace" }}>A</div>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 700, color: "#1A1035", letterSpacing: -0.5 }}>AgntPro<span style={{ color: "#8B5CF6" }}>.ai</span></span>
-            </a>
-          )}
-          <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E8E5F0", background: "transparent", cursor: "pointer", fontSize: 12, color: "#8E87A5", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {sidebarCollapsed ? "→" : "←"}
-          </button>
-        </div>
+function CV({agent}){const[msgs,setMsgs]=useState([]);const[input,setInput]=useState("");const[ld,setLd]=useState(false);const[cid,setCid]=useState(null);const ref=useRef(null);const iRef=useRef(null);useEffect(()=>{if(ref.current)ref.current.scrollTop=ref.current.scrollHeight},[msgs]);useEffect(()=>{setMsgs([]);setCid(null)},[agent._id]);
+async function send(){if(!input.trim()||ld)return;const m=input.trim();setInput("");setMsgs(p=>[...p,{r:"user",c:m}]);setLd(true);const d=await api("/api/chat/"+agent._id+"/message",{method:"POST",body:JSON.stringify({message:m,conversationId:cid})});if(d.response){setMsgs(p=>[...p,{r:"assistant",c:d.response}]);if(d.conversationId)setCid(d.conversationId)}else setMsgs(p=>[...p,{r:"assistant",c:d.error||"Error"}]);setLd(false);if(iRef.current)iRef.current.focus()}
+return(<div style={{display:"flex",flexDirection:"column",height:"100vh"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 24px",background:"#fff",borderBottom:"1px solid #E6E3DC"}}><div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:32,height:32,borderRadius:8,background:agent.color||"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'IBM Plex Mono'",fontWeight:700,fontSize:12}}>{agent.avatar}</div><div><h2 style={{fontSize:15,fontWeight:600,margin:0}}>{agent.name}</h2><span style={{fontSize:11,color:"#059669"}}>Active</span></div></div><button onClick={()=>{setMsgs([]);setCid(null)}} style={bo}>Clear</button></div>
+<div style={{flex:1,display:"flex",overflow:"hidden",padding:20,gap:20}}>
+<div style={{width:360,background:"#141210",borderRadius:32,padding:10,boxShadow:"0 16px 48px rgba(20,18,16,.18)",flexShrink:0}}><div style={{background:"#fff",borderRadius:24,overflow:"hidden",display:"flex",flexDirection:"column",height:560}}>
+<div style={{display:"flex",justifyContent:"space-between",padding:"10px 18px 4px",fontSize:11,fontWeight:600}}><span>9:41</span><span>5G</span></div>
+<div style={{display:"flex",alignItems:"center",gap:9,padding:"6px 14px 10px",borderBottom:"1px solid #F0EEE8"}}><div style={{width:30,height:30,borderRadius:8,background:agent.color||"#2563EB",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontFamily:"'IBM Plex Mono'",fontWeight:700,fontSize:10}}>{agent.avatar}</div><div><div style={{fontSize:13,fontWeight:600}}>{agent.name}</div><div style={{fontSize:10,color:"#059669"}}>online</div></div></div>
+<div ref={ref} style={{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:7,background:"#FAFAF8"}}>
+{msgs.length===0&&<div style={{textAlign:"center",padding:"28px 14px"}}><div style={{fontFamily:"'IBM Plex Mono'",fontWeight:700,fontSize:28,color:"#B5B1AA",marginBottom:10}}>{agent.avatar}</div><p style={{fontSize:12,color:"#8A8680",lineHeight:1.5}}>Start a conversation</p><div style={{display:"flex",flexDirection:"column",gap:4,marginTop:14}}>{["Where is my order?","I need help with returns","Product availability"].map((q,i)=>(<button key={i} onClick={()=>setInput(q)} style={{background:"#fff",border:"1px solid #E6E3DC",borderRadius:8,padding:"7px 12px",fontSize:11,color:"#3D3A34",textAlign:"left"}}>{q}</button>))}</div></div>}
+{msgs.map((m,i)=>(<div key={i} style={{maxWidth:"78%",padding:"9px 13px",borderRadius:14,fontSize:12,lineHeight:1.5,whiteSpace:"pre-line",animation:"fadeIn .25s",alignSelf:m.r==="user"?"flex-end":"flex-start",background:m.r==="user"?"#2563EB":"#fff",color:m.r==="user"?"#fff":"#141210",borderBottomRightRadius:m.r==="user"?4:14,borderBottomLeftRadius:m.r==="assistant"?4:14,border:m.r==="assistant"?"1px solid #E6E3DC":"none"}}>{m.c}</div>))}
+{ld&&<div style={{alignSelf:"flex-start",background:"#fff",border:"1px solid #E6E3DC",borderRadius:14,borderBottomLeftRadius:4,padding:"12px 16px",display:"flex",gap:4}}>{[0,.15,.3].map((d,i)=>(<span key={i} style={{width:6,height:6,borderRadius:"50%",background:"#B5B1AA",animation:"bounce 1.2s ease-in-out "+d+"s infinite",display:"inline-block"}}/>))}</div>}
+</div>
+<div style={{display:"flex",alignItems:"center",gap:7,padding:"9px 12px",borderTop:"1px solid #F0EEE8"}}><input ref={iRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")send()}} placeholder="Type a message..." style={{flex:1,border:"1px solid #E6E3DC",borderRadius:16,padding:"8px 12px",fontSize:12,fontFamily:"'Sora'",background:"#FAFAF8",outline:"none"}}/><button onClick={send} disabled={!input.trim()||ld} style={{width:30,height:30,borderRadius:"50%",background:"#2563EB",border:"none",color:"#fff",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,opacity:input.trim()?1:.4}}>&#8593;</button></div>
+</div></div>
+<div style={{flex:1,display:"flex",flexDirection:"column",gap:14,overflow:"auto",minWidth:240,maxWidth:320}}>
+<Card t="Session">{[["Messages",msgs.length],["Channel","Website"],["Model","GPT-4o / Claude"]].map(([k,v],i)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:"1px solid #F0EEE8",fontSize:12}}><span style={{color:"#8A8680"}}>{k}</span><span style={{fontWeight:600}}>{v}</span></div>))}</Card>
+</div></div></div>)}
 
-        <div style={{ padding: "12px 8px", display: "flex", flexDirection: "column", gap: 2 }}>
-          {[
-            { id: "agents", icon: "🤖", label: "My Agents" },
-            { id: "chat", icon: "💬", label: "Test Chat" },
-            { id: "knowledge", icon: "📚", label: "Knowledge Base" },
-            { id: "channels", icon: "📡", label: "Channels" },
-            { id: "settings", icon: "⚙️", label: "Agent Config" },
-            { id: "analytics", icon: "📊", label: "Analytics" },
-          ].map(item => (
-            <button key={item.id} onClick={() => setCurrentView(item.id)} title={item.label}
-              style={{ display: "flex", alignItems: "center", gap: 10, border: "none", borderRadius: 8, cursor: "pointer", fontSize: 14, fontWeight: currentView === item.id ? 600 : 500, color: currentView === item.id ? "#8B5CF6" : "#4A4362", background: currentView === item.id ? "#F0EDFF" : "transparent", padding: sidebarCollapsed ? 12 : "10px 16px", justifyContent: sidebarCollapsed ? "center" : "flex-start", transition: "all 0.15s", textAlign: "left", fontFamily: "'Outfit', sans-serif" }}>
-              <span style={{ fontSize: 18 }}>{item.icon}</span>
-              {!sidebarCollapsed && <span style={{ whiteSpace: "nowrap" }}>{item.label}</span>}
-            </button>
-          ))}
-        </div>
+function KV({agent,rl}){const[items,setItems]=useState([]);const[tab,setTab]=useState("pdf");const[url,setUrl]=useState("");const[tn,setTn]=useState("");const[tc,setTc]=useState("");const[ld,setLd]=useState(false);const[st,setSt]=useState("");const fr=useRef(null);useEffect(()=>{lk()},[agent._id]);
+async function lk(){const d=await api("/api/knowledge/"+agent._id);if(d.items)setItems(d.items)}
+async function upPDF(e){const f=e.target.files[0];if(!f)return;setLd(true);setSt("Extracting...");const fd=new FormData();fd.append("file",f);const tk=localStorage.getItem("agntpro_token");try{const r=await fetch(API_BASE+"/api/knowledge/"+agent._id+"/pdf",{method:"POST",headers:{Authorization:"Bearer "+tk},body:fd});const d=await r.json();if(d.item){setItems(p=>[d.item,...p]);setSt("Done")}else setSt("Error: "+d.error)}catch(e){setSt("Failed")}setLd(false);setTimeout(()=>setSt(""),3000)}
+async function scrape(){if(!url.trim())return;setLd(true);setSt("Scraping...");const d=await api("/api/knowledge/"+agent._id+"/url",{method:"POST",body:JSON.stringify({url})});if(d.item){setItems(p=>[d.item,...p]);setUrl("");setSt("Done")}else setSt("Error");setLd(false);setTimeout(()=>setSt(""),3000)}
+async function addT(){if(!tn.trim()||!tc.trim())return;const d=await api("/api/knowledge/"+agent._id+"/text",{method:"POST",body:JSON.stringify({name:tn,content:tc})});if(d.item){setItems(p=>[d.item,...p]);setTn("");setTc("")}}
+async function rm(id){await api("/api/knowledge/"+agent._id+"/"+id,{method:"DELETE"});setItems(p=>p.filter(i=>i._id!==id))}
+return(<div style={{padding:"24px 28px",maxWidth:860}}><h1 style={{fontSize:24,fontWeight:700,marginBottom:4}}>Knowledge Base</h1><p style={{fontSize:13,color:"#8A8680",marginBottom:24}}>{agent.name}</p>
+{st&&<div style={{background:st==="Done"?"#ECFDF5":"#FFFBEB",border:"1px solid "+(st==="Done"?"#A7F3D0":"#FDE68A"),borderRadius:8,padding:"8px 14px",marginBottom:16,fontSize:12,color:st==="Done"?"#065F46":"#92400E"}}>{st}</div>}
+<div style={{display:"flex",gap:6,marginBottom:20}}>{[["pdf","PDF"],["url","URL"],["text","Text"]].map(([id,l])=>(<button key={id} onClick={()=>setTab(id)} style={{padding:"7px 16px",borderRadius:8,fontSize:12,fontWeight:tab===id?600:500,border:"1.5px solid "+(tab===id?"#2563EB":"#E6E3DC"),background:tab===id?"#EFF6FF":"#fff",color:tab===id?"#2563EB":"#3D3A34"}}>{l}</button>))}</div>
+{tab==="pdf"&&<div><input ref={fr} type="file" accept=".pdf" onChange={upPDF} style={{display:"none"}}/><div onClick={()=>fr.current?.click()} style={{border:"2px dashed #E6E3DC",borderRadius:14,padding:"40px 24px",textAlign:"center",cursor:"pointer",background:"#fff"}}><div style={{fontFamily:"'IBM Plex Mono'",fontSize:28,color:"#B5B1AA",marginBottom:8}}>PDF</div><p style={{fontSize:12,color:"#8A8680"}}>Click to upload. Text extracted via AI.</p></div></div>}
+{tab==="url"&&<div style={{background:"#fff",borderRadius:14,border:"1px solid #E6E3DC",padding:24}}><div style={{display:"flex",gap:10}}><input value={url} onChange={e=>setUrl(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")scrape()}} placeholder="https://example.com/faq" style={inp}/><button onClick={scrape} disabled={ld} style={{...bp,whiteSpace:"nowrap"}}>{ld?"...":"Extract"}</button></div></div>}
+{tab==="text"&&<div style={{background:"#fff",borderRadius:14,border:"1px solid #E6E3DC",padding:24}}><input value={tn} onChange={e=>setTn(e.target.value)} placeholder="Document name" style={{...inp,marginBottom:10}}/><textarea value={tc} onChange={e=>setTc(e.target.value)} placeholder="Paste content..." rows={8} style={{...inp,resize:"vertical",lineHeight:1.6,marginBottom:14}}/><button onClick={addT} style={bp}>Add</button></div>}
+<h3 style={{fontSize:15,fontWeight:600,marginTop:28,marginBottom:14}}>Documents ({items.length})</h3>
+{items.length===0?<div style={{textAlign:"center",padding:40,background:"#fff",borderRadius:14,border:"1px solid #E6E3DC"}}><p style={{fontSize:13,color:"#8A8680"}}>No documents yet.</p></div>:<div style={{display:"flex",flexDirection:"column",gap:8}}>{items.map(i=>(<div key={i._id} style={{display:"flex",alignItems:"center",gap:12,background:"#fff",borderRadius:10,border:"1px solid #E6E3DC",padding:14}}><div style={{fontFamily:"'IBM Plex Mono'",fontWeight:600,fontSize:10,padding:"6px 10px",borderRadius:6,background:"#EFF6FF",color:"#2563EB"}}>{i.type.toUpperCase()}</div><div style={{flex:1}}><div style={{fontSize:13,fontWeight:500}}>{i.name}</div><div style={{fontSize:11,color:"#8A8680"}}>{(i.content||"").length.toLocaleString()} chars</div></div><button onClick={()=>rm(i._id)} style={{width:26,height:26,borderRadius:6,border:"1px solid #E6E3DC",background:"transparent",fontSize:11,color:"#E11D48",display:"flex",alignItems:"center",justifyContent:"center"}}>x</button></div>))}</div>}
+</div>)}
 
-        {!sidebarCollapsed && (
-          <div style={{ flex: 1, padding: "12px 8px", borderTop: "1px solid #F0EEF5", overflow: "auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", marginBottom: 8 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: "#C4BED6", letterSpacing: 1.5, fontFamily: "'JetBrains Mono', monospace" }}>AGENTS</span>
-              <button onClick={() => setShowCreateModal(true)} style={{ width: 22, height: 22, borderRadius: 6, border: "1px solid #E8E5F0", background: "transparent", cursor: "pointer", fontSize: 14, color: "#8B5CF6", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
-            </div>
-            {agents.map(agent => (
-              <button key={agent.id} onClick={() => { setActiveAgentId(agent.id); setCurrentView("chat"); }}
-                style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: activeAgentId === agent.id ? "#F0EDFF" : "transparent", cursor: "pointer", textAlign: "left", fontFamily: "'Outfit', sans-serif" }}>
-                <span style={{ fontSize: 20 }}>{agent.avatar}</span>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1035" }}>{agent.name}</span>
-                  <span style={{ fontSize: 11, color: "#8E87A5" }}>{agent.knowledgeBase.length} KB items</span>
-                </div>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981", flexShrink: 0 }} />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+function ChV({agent,rl}){const[cfg,setCfg]=useState(null);const[chTab,setChTab]=useState("website");const[pid,setPid]=useState("");const[bid,setBid]=useState("");const[tk,setTk]=useState("");const[show,setShow]=useState(false);const[tst,setTst]=useState(null);const[sav,setSav]=useState(false);
+useEffect(()=>{lc()},[agent._id]);async function lc(){const d=await api("/api/channels/"+agent._id);if(!d.error)setCfg(d)}
+async function enableWeb(){setSav(true);const d=await api("/api/channels/"+agent._id+"/website/enable",{method:"POST",body:JSON.stringify({brandColor:agent.color||"#2563EB"})});setSav(false);if(d.success){lc();rl()}}
+async function toggleWebLive(){await api("/api/channels/"+agent._id+"/website/toggle-live",{method:"POST"});lc();rl()}
+async function connectWA(){if(!pid||!tk)return;setSav(true);await api("/api/channels/"+agent._id+"/whatsapp/connect",{method:"POST",body:JSON.stringify({phoneNumberId:pid,businessAccountId:bid,accessToken:tk})});setSav(false);lc();rl()}
+async function testWA(){setTst("testing");const d=await api("/api/channels/"+agent._id+"/whatsapp/test",{method:"POST"});setTst(d.success?"ok":"err");setTimeout(()=>setTst(null),3000)}
+async function toggleWALive(){await api("/api/channels/"+agent._id+"/whatsapp/toggle-live",{method:"POST"});lc();rl()}
 
-      {/* MAIN */}
-      <div style={{ flex: 1, overflow: "auto" }}>
-        {currentView === "agents" && <AgentsView agents={agents} activeAgentId={activeAgentId} onSelect={id => { setActiveAgentId(id); setCurrentView("chat"); }} onCreate={() => setShowCreateModal(true)} onDelete={deleteAgent} />}
-        {currentView === "chat" && activeAgent && <ChatView agent={activeAgent} updateAgent={updateAgent} />}
-        {currentView === "knowledge" && activeAgent && <KnowledgeBaseView agent={activeAgent} updateAgent={updateAgent} />}
-        {currentView === "channels" && activeAgent && <ChannelsView agent={activeAgent} updateAgent={updateAgent} />}
-        {currentView === "settings" && activeAgent && <SettingsView agent={activeAgent} updateAgent={updateAgent} />}
-        {currentView === "analytics" && activeAgent && <AnalyticsView agent={activeAgent} />}
-      </div>
+const web=cfg?.website||{};const wa=cfg?.whatsapp||{};
 
-      {showCreateModal && (
-        <Modal onClose={() => setShowCreateModal(false)} title="Create New Agent">
-          <p style={{ fontSize: 14, color: "#8E87A5", marginBottom: 24 }}>Choose a template to get started quickly.</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-            {Object.entries(PRESET_AGENTS).map(([key, preset]) => (
-              <button key={key} onClick={() => createAgent(key)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "24px 16px", border: "1.5px solid #E8E5F0", borderRadius: 14, background: "#fff", cursor: "pointer", fontFamily: "'Outfit', sans-serif", transition: "all 0.15s" }}>
-                <span style={{ fontSize: 32 }}>{preset.avatar}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1035" }}>{preset.name}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#8B5CF6", letterSpacing: 1, fontFamily: "'JetBrains Mono', monospace" }}>{key.toUpperCase()}</span>
-              </button>
-            ))}
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
+return(<div style={{padding:"24px 28px",maxWidth:960}}><h1 style={{fontSize:24,fontWeight:700,marginBottom:4}}>Channels</h1><p style={{fontSize:13,color:"#8A8680",marginBottom:24}}>Connect {agent.name} to channels</p>
+<div style={{display:"flex",gap:8,marginBottom:24}}>{[["website","Website Chatbot"],["whatsapp","WhatsApp"],["rcs","RCS"]].map(([id,l])=>(<button key={id} onClick={()=>setChTab(id)} style={{padding:"9px 20px",borderRadius:8,fontSize:13,fontWeight:chTab===id?600:500,border:"1.5px solid "+(chTab===id?"#2563EB":"#E6E3DC"),background:chTab===id?"#EFF6FF":"#fff",color:chTab===id?"#2563EB":"#3D3A34"}}>{l}</button>))}</div>
 
-// ============================================================
-// AGENTS VIEW
-// ============================================================
-function AgentsView({ agents, activeAgentId, onSelect, onCreate, onDelete }) {
-  return (
-    <div style={{ padding: "28px 32px", maxWidth: 1200 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-        <div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5, marginBottom: 4 }}>My Agents</h1>
-          <p style={{ fontSize: 14, color: "#8E87A5" }}>Manage your AI-powered conversational agents</p>
-        </div>
-        <button onClick={onCreate} style={btnPrimary}>+ Create Agent</button>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
-        {agents.map(agent => (
-          <div key={agent.id} style={{ background: "#fff", borderRadius: 16, border: `1.5px solid ${activeAgentId === agent.id ? "#8B5CF6" : "#E8E5F0"}`, padding: 24 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-              <div style={{ width: 50, height: 50, borderRadius: 14, background: (agent.color || "#8B5CF6") + "15", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: 28 }}>{agent.avatar}</span>
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: 17, fontWeight: 600 }}>{agent.name}</h3>
-                <span style={{ fontSize: 12, color: "#8E87A5" }}>📱 {agent.channel || "whatsapp"}</span>
-              </div>
-              <div style={{ padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, background: "#ECFDF5", color: "#10B981" }}>Active</div>
-            </div>
-            <p style={{ fontSize: 13, color: "#8E87A5", lineHeight: 1.6, marginBottom: 16 }}>{agent.prompt.slice(0, 120)}...</p>
-            <div style={{ display: "flex", gap: 24, marginBottom: 16, paddingTop: 16, borderTop: "1px solid #F0EEF5" }}>
-              <div><span style={{ fontSize: 20, fontWeight: 700, fontFamily: "'JetBrains Mono'" }}>{agent.knowledgeBase?.length || 0}</span><br/><span style={{ fontSize: 11, color: "#8E87A5" }}>KB Items</span></div>
-              <div><span style={{ fontSize: 20, fontWeight: 700, fontFamily: "'JetBrains Mono'" }}>{agent.conversations?.length || 0}</span><br/><span style={{ fontSize: 11, color: "#8E87A5" }}>Chats</span></div>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => onSelect(agent.id)} style={btnSecondary}>Test Chat →</button>
-              {agents.length > 1 && <button onClick={() => onDelete(agent.id)} style={{ ...btnSecondary, background: "#FFF1F2", color: "#F43F5E" }}>Delete</button>}
-            </div>
-          </div>
-        ))}
-        <button onClick={onCreate} style={{ background: "#fff", borderRadius: 16, border: "2px dashed #E8E5F0", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 200, cursor: "pointer", gap: 8 }}>
-          <span style={{ fontSize: 36, color: "#C4BED6" }}>+</span>
-          <span style={{ fontSize: 14, color: "#8E87A5", fontWeight: 500 }}>Create New Agent</span>
-        </button>
-      </div>
-    </div>
-  );
-}
+{chTab==="website"&&<div style={{display:"flex",flexDirection:"column",gap:16}}>
+<div style={{background:web.enabled?"#ECFDF5":"#EFF6FF",border:"1px solid "+(web.enabled?"#A7F3D0":"#BFDBFE"),borderRadius:12,padding:"14px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><div><div style={{fontSize:13,fontWeight:600,color:web.enabled?"#065F46":"#1E40AF"}}>{web.enabled?"Website Chatbot Enabled":"Enable Website Chatbot"}</div><div style={{fontSize:11,color:web.enabled?"#047857":"#3B82F6",marginTop:2}}>{web.enabled?"Embed script ready":"One click to get your embed code"}</div></div>
+{web.enabled?<div onClick={toggleWebLive} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}><span style={{fontSize:12,fontWeight:600,color:web.live?"#059669":"#8A8680"}}>{web.live?"Live":"Test"}</span><div style={{width:40,height:22,borderRadius:11,background:web.live?"#059669":"#E6E3DC",padding:2,transition:"all .25s"}}><div style={{width:18,height:18,borderRadius:9,background:"#fff",transition:"transform .25s",transform:web.live?"translateX(18px)":"translateX(0)"}}/></div></div>:<button onClick={enableWeb} disabled={sav} style={{...bp,fontSize:12,padding:"8px 18px"}}>{sav?"Enabling...":"Enable"}</button>}</div>
+{web.enabled&&web.embedScript&&<div style={{background:"#fff",borderRadius:12,border:"1px solid #E6E3DC",padding:22}}>
+<h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Embed Code</h3>
+<p style={{fontSize:12,color:"#8A8680",marginBottom:14}}>Add this script tag to your website, just before the closing body tag.</p>
+<div style={{background:"#141210",borderRadius:8,padding:16,fontFamily:"'IBM Plex Mono'",fontSize:12,color:"#A7F3D0",lineHeight:1.6,wordBreak:"break-all"}}>{web.embedScript}</div>
+<button onClick={()=>{navigator.clipboard.writeText(web.embedScript||"")}} style={{...bs,marginTop:12}}>Copy to Clipboard</button>
+</div>}
+</div>}
 
-// ============================================================
-// CHAT VIEW — Claude API
-// ============================================================
-function ChatView({ agent, updateAgent }) {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionStarted, setSessionStarted] = useState(false);
-  const chatRef = useRef(null);
-  const inputRef = useRef(null);
+{chTab==="whatsapp"&&<div style={{display:"flex",flexDirection:"column",gap:16}}>
+<div style={{background:wa.enabled?"#ECFDF5":"#FFFBEB",border:"1px solid "+(wa.enabled?"#A7F3D0":"#FDE68A"),borderRadius:12,padding:"14px 18px",display:"flex",alignItems:"center",justifyContent:"space-between"}}><div><div style={{fontSize:13,fontWeight:600,color:wa.enabled?"#065F46":"#92400E"}}>{wa.enabled?"WhatsApp Connected":"Not Connected"}</div></div>
+{wa.enabled&&<div onClick={toggleWALive} style={{display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}><span style={{fontSize:12,fontWeight:600,color:wa.live?"#059669":"#8A8680"}}>{wa.live?"Live":"Test"}</span><div style={{width:40,height:22,borderRadius:11,background:wa.live?"#059669":"#E6E3DC",padding:2,transition:"all .25s"}}><div style={{width:18,height:18,borderRadius:9,background:"#fff",transition:"transform .25s",transform:wa.live?"translateX(18px)":"translateX(0)"}}/></div></div>}</div>
+<div style={{background:"#fff",borderRadius:12,border:"1px solid #E6E3DC",padding:22}}><h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Meta API Credentials</h3>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}><div><label style={lbl}>Phone Number ID</label><input value={pid} onChange={e=>setPid(e.target.value)} placeholder="100234567890" style={inp}/></div><div><label style={lbl}>Business Account ID</label><input value={bid} onChange={e=>setBid(e.target.value)} placeholder="109876543210" style={inp}/></div></div>
+<div style={{marginBottom:14}}><label style={lbl}>Access Token</label><div style={{display:"flex",gap:6}}><input value={tk} onChange={e=>setTk(e.target.value)} type={show?"text":"password"} placeholder="EAAxxxxxxxxxx..." style={{...inp,flex:1}}/><button onClick={()=>setShow(!show)} style={{...bo,padding:"6px 12px",fontSize:11}}>{show?"Hide":"Show"}</button></div></div>
+<button onClick={connectWA} disabled={sav} style={bp}>{sav?"Saving...":"Save Credentials"}</button></div>
+{wa.enabled&&<div style={{background:"#fff",borderRadius:12,border:"1px solid #E6E3DC",padding:22}}><h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Webhook</h3>
+<div style={{marginBottom:10}}><label style={lbl}>Callback URL</label><div style={{padding:"9px 14px",background:"#FAFAF8",border:"1px solid #E6E3DC",borderRadius:8,fontSize:12,fontFamily:"'IBM Plex Mono'",wordBreak:"break-all"}}>{wa.webhookUrl||"Deploy backend first"}</div></div>
+<div><label style={lbl}>Verify Token</label><div style={{padding:"9px 14px",background:"#FAFAF8",border:"1px solid #E6E3DC",borderRadius:8,fontSize:12,fontFamily:"'IBM Plex Mono'"}}>{wa.webhookVerifyToken||"Connect first"}</div></div></div>}
+{wa.enabled&&<button onClick={testWA} style={{...bp,background:tst==="ok"?"#059669":tst==="err"?"#E11D48":"#2563EB",alignSelf:"flex-start"}}>{tst==="testing"?"Testing...":tst==="ok"?"Connected":tst==="err"?"Failed":"Test Connection"}</button>}
+</div>}
 
-  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [messages]);
+{chTab==="rcs"&&<div style={{background:"#fff",borderRadius:12,border:"1px solid #E6E3DC",padding:28,textAlign:"center"}}><div style={{fontFamily:"'IBM Plex Mono'",fontSize:24,color:"#B5B1AA",marginBottom:12}}>RCS</div><h3 style={{fontSize:16,fontWeight:600,marginBottom:6}}>RCS Business Messaging</h3><p style={{fontSize:13,color:"#8A8680"}}>Coming soon. Contact us for early access.</p></div>}
+</div>)}
 
-  function buildSystemPrompt() {
-    let kb = "";
-    if (agent.knowledgeBase && agent.knowledgeBase.length > 0) {
-      kb = "\n\n--- KNOWLEDGE BASE ---\n";
-      agent.knowledgeBase.forEach(item => { kb += "\n[" + item.type.toUpperCase() + ": " + item.name + "]\n" + item.content + "\n"; });
-      kb += "\n--- END KNOWLEDGE BASE ---\nUse the knowledge base above to answer questions accurately. If the answer is in the knowledge base, cite it.";
-    }
-    return agent.prompt + kb;
-  }
+function SV({agent,rl}){const[name,setName]=useState(agent.name);const[prompt,setPrompt]=useState(agent.prompt);const[saved,setSaved]=useState(false);useEffect(()=>{setName(agent.name);setPrompt(agent.prompt)},[agent._id]);
+async function save(){await api("/api/agents/"+agent._id,{method:"PUT",body:JSON.stringify({name,prompt})});setSaved(true);rl();setTimeout(()=>setSaved(false),2000)}
+return(<div style={{padding:"24px 28px",maxWidth:960}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:24}}><div><h1 style={{fontSize:24,fontWeight:700,marginBottom:4}}>Settings</h1><p style={{fontSize:13,color:"#8A8680"}}>{agent.name}</p></div><button onClick={save} style={{...bp,background:saved?"#059669":"#2563EB"}}>{saved?"Saved":"Save Changes"}</button></div>
+<div style={{display:"grid",gridTemplateColumns:"1fr 280px",gap:20}}>
+<div><div style={{marginBottom:18}}><label style={lbl}>Agent Name</label><input value={name} onChange={e=>setName(e.target.value)} style={inp}/></div><div><label style={lbl}>System Prompt</label><textarea value={prompt} onChange={e=>setPrompt(e.target.value)} rows={16} style={{...inp,fontFamily:"'IBM Plex Mono'",fontSize:12,resize:"vertical",lineHeight:1.7}}/></div></div>
+<div style={{background:"#FFFBEB",border:"1px solid #FDE68A",borderRadius:12,padding:18,height:"fit-content"}}><h4 style={{fontSize:13,fontWeight:600,color:"#92400E",marginBottom:10}}>Prompt Tips</h4><div style={{fontSize:12,color:"#92400E",lineHeight:1.9}}><p>Define role and company</p><p>List capabilities</p><p>Set tone and guardrails</p><p>Add sample data</p><p>Specify escalation rules</p></div></div>
+</div></div>)}
 
-  async function sendMessage() {
-    if (!input.trim() || isLoading) return;
-    const userMsg = input.trim();
-    setInput("");
-    setSessionStarted(true);
-    const newMsgs = [...messages, { role: "user", content: userMsg }];
-    setMessages(newMsgs);
-    setIsLoading(true);
+function StV({agent}){const s=agent.stats||{};return(<div style={{padding:"24px 28px",maxWidth:960}}><h1 style={{fontSize:24,fontWeight:700,marginBottom:4}}>Analytics</h1><p style={{fontSize:13,color:"#8A8680",marginBottom:24}}>{agent.name}</p><div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>{[{l:"Conversations",v:s.totalConversations||0,c:"#2563EB"},{l:"Messages",v:s.totalMessages||0,c:"#0D9488"},{l:"Avg Response",v:(s.avgResponseTime||0)+"ms",c:"#D97706"},{l:"Resolution",v:"89%",c:"#059669"}].map((x,i)=>(<div key={i} style={{background:"#fff",borderRadius:12,border:"1px solid #E6E3DC",padding:20,textAlign:"center"}}><div style={{fontSize:24,fontWeight:700,fontFamily:"'IBM Plex Mono'",color:x.c}}>{x.v}</div><div style={{fontSize:12,color:"#8A8680",marginTop:4}}>{x.l}</div></div>))}</div></div>)}
 
-    try {
-      const apiMsgs = newMsgs.map(m => ({ role: m.role, content: m.content }));
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: buildSystemPrompt(), messages: apiMsgs })
-      });
-      const data = await resp.json();
-      let text = "";
-      if (data.content) data.content.forEach(b => { if (b.type === "text") text += b.text; });
-      if (!text) text = "Sorry, I couldn't process that. Please try again.";
-      setMessages(prev => [...prev, { role: "assistant", content: text }]);
-    } catch (err) {
-      setMessages(prev => [...prev, { role: "assistant", content: "Connection error. Please check your setup and try again." }]);
-    }
-    setIsLoading(false);
-    if (inputRef.current) inputRef.current.focus();
-  }
+function Mod({children,onClose,title}){return(<div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(20,18,16,.4)",backdropFilter:"blur(6px)",display:"flex",justifyContent:"center",alignItems:"center",zIndex:2000,padding:20}}><div onClick={e=>e.stopPropagation()} style={{background:"#fff",borderRadius:16,boxShadow:"0 16px 48px rgba(0,0,0,.12)",width:"100%",maxWidth:480,padding:24}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><h2 style={{fontSize:18,fontWeight:700}}>{title}</h2><button onClick={onClose} style={{width:28,height:28,borderRadius:6,border:"1px solid #E6E3DC",background:"transparent",fontSize:13,color:"#8A8680",display:"flex",alignItems:"center",justifyContent:"center"}}>x</button></div>{children}</div></div>)}
+function Card({t,children}){return(<div style={{background:"#fff",borderRadius:12,border:"1px solid #E6E3DC",padding:18}}><h3 style={{fontSize:13,fontWeight:600,marginBottom:10}}>{t}</h3>{children}</div>)}
 
-  const quickPrompts = ["Where is my order #12345?", "I want to return a product", "What sizes do you have for sneakers?", "My delivery is late, help!"];
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* Top Bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px", background: "#fff", borderBottom: "1px solid #E8E5F0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 24 }}>{agent.avatar}</span>
-          <div>
-            <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>{agent.name}</h2>
-            <span style={{ fontSize: 12, color: "#8E87A5" }}><span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10B981", display: "inline-block", marginRight: 6 }}></span>Active · WhatsApp Business API</span>
-          </div>
-        </div>
-        <button onClick={() => { setMessages([]); setSessionStarted(false); }} style={btnOutline}>Clear Chat</button>
-      </div>
-
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", padding: 24, gap: 24 }}>
-        {/* Phone */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
-          <div style={{ width: 340, background: "#1A1035", borderRadius: 40, padding: 10, boxShadow: "0 20px 60px rgba(26,16,53,0.2)", position: "relative", flexShrink: 0 }}>
-            <div style={{ width: 120, height: 26, background: "#1A1035", borderRadius: "0 0 16px 16px", position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", zIndex: 5 }} />
-            <div style={{ background: "#fff", borderRadius: 32, overflow: "hidden", display: "flex", flexDirection: "column", height: 600 }}>
-              {/* Phone Header */}
-              <div style={{ background: "#fff" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 20px 4px", fontSize: 12, fontWeight: 600, color: "#1A1035" }}>
-                  <span>9:41</span><span>5G ●●●</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 14px 10px", borderBottom: "1px solid #F0EEF5" }}>
-                  <span style={{ fontSize: 18, color: "#8B5CF6" }}>‹</span>
-                  <div style={{ width: 34, height: 34, borderRadius: "50%", background: (agent.color || "#8B5CF6") + "20", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{agent.avatar}</div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{agent.name}</div>
-                    <div style={{ fontSize: 11, color: "#10B981" }}>online</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Chat Body */}
-              <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: 14, display: "flex", flexDirection: "column", gap: 8, background: "#FAFBFD" }}>
-                {!sessionStarted && (
-                  <div style={{ textAlign: "center", padding: "30px 16px" }}>
-                    <div style={{ fontSize: 40, marginBottom: 12 }}>{agent.avatar}</div>
-                    <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{agent.name}</h3>
-                    <p style={{ fontSize: 13, color: "#8E87A5", lineHeight: 1.5, maxWidth: 250, margin: "0 auto 20px" }}>Start a conversation to test your agent.</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {quickPrompts.map((q, i) => (
-                        <button key={i} onClick={() => setInput(q)} style={{ background: "#fff", border: "1px solid #E8E5F0", borderRadius: 10, padding: "8px 14px", fontSize: 12, color: "#4A4362", cursor: "pointer", textAlign: "left", fontFamily: "'Outfit', sans-serif" }}>{q}</button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {messages.map((msg, i) => (
-                  <div key={i} style={{ maxWidth: "80%", padding: "10px 14px", borderRadius: 16, fontSize: 13, lineHeight: 1.55, whiteSpace: "pre-line", animation: "fadeIn 0.25s ease", alignSelf: msg.role === "user" ? "flex-end" : "flex-start", background: msg.role === "user" ? "#8B5CF6" : "#fff", color: msg.role === "user" ? "#fff" : "#1A1035", borderBottomRightRadius: msg.role === "user" ? 4 : 16, borderBottomLeftRadius: msg.role === "assistant" ? 4 : 16, border: msg.role === "assistant" ? "1px solid #EEEAF5" : "none", fontWeight: msg.role === "user" ? 500 : 400 }}>
-                    {msg.content}
-                  </div>
-                ))}
-                {isLoading && (
-                  <div style={{ alignSelf: "flex-start", background: "#fff", border: "1px solid #EEEAF5", borderRadius: 16, borderBottomLeftRadius: 4, padding: "14px 18px", display: "flex", gap: 4, alignItems: "center" }}>
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#C4BED6", animation: "bounce 1.2s ease-in-out infinite", display: "inline-block" }} />
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#C4BED6", animation: "bounce 1.2s ease-in-out 0.15s infinite", display: "inline-block" }} />
-                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#C4BED6", animation: "bounce 1.2s ease-in-out 0.3s infinite", display: "inline-block" }} />
-                  </div>
-                )}
-              </div>
-
-              {/* Input */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", borderTop: "1px solid #F0EEF5", background: "#fff" }}>
-                <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") sendMessage(); }} placeholder="Type a message..." style={{ flex: 1, border: "1.5px solid #E8E5F0", borderRadius: 20, padding: "9px 14px", fontSize: 13, fontFamily: "'Outfit', sans-serif", background: "#FAFBFD", outline: "none" }} />
-                <button onClick={sendMessage} disabled={!input.trim() || isLoading} style={{ width: 34, height: 34, borderRadius: "50%", background: "#8B5CF6", border: "none", color: "#fff", fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, opacity: input.trim() ? 1 : 0.4 }}>↑</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Side Panel */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 16, overflow: "auto", minWidth: 280, maxWidth: 340 }}>
-          <div style={cardStyle}>
-            <h3 style={cardTitle}>Agent Prompt</h3>
-            <div style={{ fontSize: 12, color: "#8E87A5", lineHeight: 1.6, background: "#FAFBFD", borderRadius: 8, padding: 12, border: "1px solid #F0EEF5", maxHeight: 140, overflow: "hidden" }}>{agent.prompt.slice(0, 300)}...</div>
-          </div>
-          <div style={cardStyle}>
-            <h3 style={cardTitle}>Knowledge Base</h3>
-            {agent.knowledgeBase.length === 0
-              ? <p style={{ fontSize: 13, color: "#8E87A5", lineHeight: 1.6 }}>No documents added yet. Add PDFs or URLs to make your agent smarter.</p>
-              : agent.knowledgeBase.map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid #F0EEF5" }}>
-                  <span style={{ fontSize: 16 }}>{item.type === "pdf" ? "📄" : "🌐"}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>{item.name}</div>
-                    <div style={{ fontSize: 11, color: "#8E87A5" }}>{(item.content || "").length} chars</div>
-                  </div>
-                </div>
-              ))
-            }
-          </div>
-          <div style={cardStyle}>
-            <h3 style={cardTitle}>Session Info</h3>
-            {[["Messages", messages.length], ["Channel", "WhatsApp"], ["Model", "Claude Sonnet"]].map(([k, v], i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #F0EEF5", fontSize: 13 }}>
-                <span style={{ color: "#8E87A5" }}>{k}</span>
-                <span style={{ fontWeight: 600 }}>{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// KNOWLEDGE BASE VIEW
-// ============================================================
-function KnowledgeBaseView({ agent, updateAgent }) {
-  const [urlInput, setUrlInput] = useState("");
-  const [urlLoading, setUrlLoading] = useState(false);
-  const [textInput, setTextInput] = useState("");
-  const [textName, setTextName] = useState("");
-  const [activeTab, setActiveTab] = useState("pdf");
-  const fileRef = useRef(null);
-
-  async function handlePDF(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async function(ev) {
-      const base64 = ev.target.result.split(",")[1];
-      try {
-        const resp = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: [{ type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } }, { type: "text", text: "Extract all text content from this PDF. Return only the raw text." }] }] })
-        });
-        const data = await resp.json();
-        let txt = "";
-        if (data.content) data.content.forEach(b => { if (b.type === "text") txt += b.text; });
-        updateAgent(agent.id, { knowledgeBase: [...(agent.knowledgeBase || []), { id: "kb-" + Date.now(), type: "pdf", name: file.name, content: txt || "Could not extract.", addedAt: Date.now() }] });
-      } catch (err) { console.error(err); }
-    };
-    reader.readAsDataURL(file);
-  }
-
-  async function handleURL() {
-    if (!urlInput.trim()) return;
-    setUrlLoading(true);
-    try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, tools: [{ type: "web_search_20250305", name: "web_search" }], messages: [{ role: "user", content: "Search and summarize all key content from: " + urlInput + ". Extract product details, policies, FAQs, etc." }] })
-      });
-      const data = await resp.json();
-      let txt = "";
-      if (data.content) data.content.forEach(b => { if (b.type === "text") txt += b.text; });
-      updateAgent(agent.id, { knowledgeBase: [...(agent.knowledgeBase || []), { id: "kb-" + Date.now(), type: "url", name: urlInput, content: txt || "Could not extract.", addedAt: Date.now() }] });
-      setUrlInput("");
-    } catch (err) { console.error(err); }
-    setUrlLoading(false);
-  }
-
-  function handleText() {
-    if (!textInput.trim() || !textName.trim()) return;
-    updateAgent(agent.id, { knowledgeBase: [...(agent.knowledgeBase || []), { id: "kb-" + Date.now(), type: "text", name: textName, content: textInput, addedAt: Date.now() }] });
-    setTextInput(""); setTextName("");
-  }
-
-  function removeKB(id) {
-    updateAgent(agent.id, { knowledgeBase: (agent.knowledgeBase || []).filter(k => k.id !== id) });
-  }
-
-  const tabs = [{ id: "pdf", icon: "📄", label: "Upload PDF" }, { id: "url", icon: "🌐", label: "Scrape URL" }, { id: "text", icon: "📝", label: "Paste Text" }];
-
-  return (
-    <div style={{ padding: "28px 32px", maxWidth: 900 }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5, marginBottom: 4 }}>Knowledge Base</h1>
-        <p style={{ fontSize: 14, color: "#8E87A5" }}>Add documents and URLs to make <strong>{agent.name}</strong> smarter</p>
-      </div>
-
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 20px", borderRadius: 10, border: `1.5px solid ${activeTab === tab.id ? "#8B5CF6" : "#E8E5F0"}`, background: activeTab === tab.id ? "#F0EDFF" : "#fff", fontSize: 13, fontWeight: activeTab === tab.id ? 600 : 500, color: activeTab === tab.id ? "#8B5CF6" : "#4A4362", cursor: "pointer", fontFamily: "'Outfit', sans-serif" }}>
-            <span>{tab.icon}</span> {tab.label}
-          </button>
-        ))}
-      </div>
-
-      <div style={{ marginBottom: 32 }}>
-        {activeTab === "pdf" && (
-          <div>
-            <input ref={fileRef} type="file" accept=".pdf" onChange={handlePDF} style={{ display: "none" }} />
-            <div onClick={() => fileRef.current?.click()} style={{ border: "2px dashed #E8E5F0", borderRadius: 16, padding: "48px 32px", textAlign: "center", cursor: "pointer", background: "#fff" }}>
-              <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>📄</span>
-              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Upload PDF Document</h3>
-              <p style={{ fontSize: 13, color: "#8E87A5" }}>Click to browse or drag & drop</p>
-              <p style={{ fontSize: 11, color: "#C4BED6", marginTop: 8 }}>Text extracted automatically using AI</p>
-            </div>
-          </div>
-        )}
-        {activeTab === "url" && (
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 28 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Scrape Website Content</h3>
-            <p style={{ fontSize: 13, color: "#8E87A5", marginBottom: 20 }}>Enter a URL and we'll extract relevant content using AI.</p>
-            <div style={{ display: "flex", gap: 12 }}>
-              <input value={urlInput} onChange={e => setUrlInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter") handleURL(); }} placeholder="https://www.yourcompany.com/faq" style={inputStyle} />
-              <button onClick={handleURL} disabled={urlLoading} style={{ ...btnPrimary, opacity: urlLoading ? 0.6 : 1 }}>{urlLoading ? "Scraping..." : "Extract →"}</button>
-            </div>
-          </div>
-        )}
-        {activeTab === "text" && (
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 28 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Paste Custom Content</h3>
-            <input value={textName} onChange={e => setTextName(e.target.value)} placeholder="Document name (e.g., Return Policy)" style={{ ...inputStyle, marginBottom: 12 }} />
-            <textarea value={textInput} onChange={e => setTextInput(e.target.value)} placeholder="Paste your content here..." rows={10} style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6, marginBottom: 16 }} />
-            <button onClick={handleText} style={btnPrimary}>Add to Knowledge Base →</button>
-          </div>
-        )}
-      </div>
-
-      <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Documents ({(agent.knowledgeBase || []).length})</h3>
-      {(agent.knowledgeBase || []).length === 0 ? (
-        <div style={{ textAlign: "center", padding: 48, background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0" }}>
-          <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>📂</span>
-          <p style={{ fontSize: 14, color: "#8E87A5" }}>No documents yet.</p>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {(agent.knowledgeBase || []).map(item => (
-            <div key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: 14, background: "#fff", borderRadius: 12, border: "1px solid #E8E5F0", padding: 16 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: "#F0EDFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
-                {item.type === "pdf" ? "📄" : item.type === "url" ? "🌐" : "📝"}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 500 }}>{item.name}</div>
-                <div style={{ fontSize: 12, color: "#8E87A5", marginTop: 2 }}>{item.type.toUpperCase()} · {(item.content || "").length.toLocaleString()} chars</div>
-                <div style={{ fontSize: 12, color: "#C4BED6", marginTop: 4 }}>{(item.content || "").slice(0, 120)}...</div>
-              </div>
-              <button onClick={() => removeKB(item.id)} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E8E5F0", background: "transparent", cursor: "pointer", fontSize: 12, color: "#F43F5E", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>✕</button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================
-// CHANNELS VIEW — WhatsApp Business API & RCS Connection
-// ============================================================
-function ChannelsView({ agent, updateAgent }) {
-  const [waConfig, setWaConfig] = useState(agent.waConfig || { phoneNumberId: "", businessAccountId: "", accessToken: "", webhookVerifyToken: "", connected: false, live: false });
-  const [rcsConfig, setRcsConfig] = useState(agent.rcsConfig || { agentId: "", serviceAccountKey: "", connected: false, live: false });
-  const [activeChannel, setActiveChannel] = useState("whatsapp");
-  const [showToken, setShowToken] = useState(false);
-  const [testStatus, setTestStatus] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const webhookUrl = "https://api.agntpro.ai/webhook/" + agent.id;
-  const agentIdShort = agent.id.slice(0, 12);
-
-  function saveConfig() {
-    setSaving(true);
-    setTimeout(() => {
-      updateAgent(agent.id, { waConfig, rcsConfig });
-      setSaving(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    }, 800);
-  }
-
-  function testConnection(channel) {
-    setTestStatus("testing");
-    setTimeout(() => {
-      if (channel === "whatsapp" && waConfig.phoneNumberId && waConfig.accessToken) {
-        setWaConfig(prev => ({ ...prev, connected: true }));
-        setTestStatus("success");
-      } else if (channel === "rcs" && rcsConfig.agentId) {
-        setRcsConfig(prev => ({ ...prev, connected: true }));
-        setTestStatus("success");
-      } else {
-        setTestStatus("error");
-      }
-      setTimeout(() => setTestStatus(null), 3000);
-    }, 1500);
-  }
-
-  function toggleLive(channel) {
-    if (channel === "whatsapp") {
-      const newState = !waConfig.live;
-      setWaConfig(prev => ({ ...prev, live: newState }));
-      updateAgent(agent.id, { waConfig: { ...waConfig, live: newState } });
-    } else {
-      const newState = !rcsConfig.live;
-      setRcsConfig(prev => ({ ...prev, live: newState }));
-      updateAgent(agent.id, { rcsConfig: { ...rcsConfig, live: newState } });
-    }
-  }
-
-  function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).catch(() => {});
-  }
-
-  const channels = [
-    { id: "whatsapp", icon: "💬", label: "WhatsApp Business API", color: "#25D366", connected: waConfig.connected, live: waConfig.live },
-    { id: "rcs", icon: "📱", label: "RCS Business Messaging", color: "#4285F4", connected: rcsConfig.connected, live: rcsConfig.live },
-  ];
-
-  return (
-    <div style={{ padding: "28px 32px", maxWidth: 1000 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-        <div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5, marginBottom: 4 }}>Channels</h1>
-          <p style={{ fontSize: 14, color: "#8E87A5" }}>Connect <strong>{agent.name}</strong> to messaging platforms</p>
-        </div>
-        <button onClick={saveConfig} style={{ ...btnPrimary, background: saved ? "#10B981" : saving ? "#A78BFA" : "#8B5CF6" }}>
-          {saved ? "✓ Saved!" : saving ? "Saving..." : "Save Configuration"}
-        </button>
-      </div>
-
-      {/* Channel Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32 }}>
-        {channels.map(ch => (
-          <button key={ch.id} onClick={() => setActiveChannel(ch.id)} style={{ background: "#fff", borderRadius: 16, border: `2px solid ${activeChannel === ch.id ? ch.color : "#E8E5F0"}`, padding: 24, cursor: "pointer", textAlign: "left", fontFamily: "'Outfit', sans-serif", transition: "all 0.2s", position: "relative", overflow: "hidden" }}>
-            {ch.live && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ch.color }} />}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: ch.color + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{ch.icon}</div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "#1A1035" }}>{ch.label}</div>
-                  <div style={{ fontSize: 12, color: "#8E87A5", marginTop: 2 }}>{ch.connected ? "Connected" : "Not connected"}</div>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                {ch.connected && <div style={{ width: 10, height: 10, borderRadius: "50%", background: ch.live ? "#10B981" : "#F59E0B", boxShadow: ch.live ? "0 0 8px rgba(16,185,129,0.4)" : "none" }} />}
-                <span style={{ fontSize: 11, fontWeight: 600, color: ch.live ? "#10B981" : ch.connected ? "#F59E0B" : "#C4BED6", textTransform: "uppercase", letterSpacing: 0.5 }}>{ch.live ? "LIVE" : ch.connected ? "TEST" : "OFFLINE"}</span>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* WhatsApp Config */}
-      {activeChannel === "whatsapp" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Connection Status Banner */}
-          <div style={{ background: waConfig.connected ? "#ECFDF5" : "#FFF7ED", border: `1px solid ${waConfig.connected ? "#A7F3D0" : "#FED7AA"}`, borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 20 }}>{waConfig.connected ? "✅" : "⚠️"}</span>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: waConfig.connected ? "#065F46" : "#92400E" }}>{waConfig.connected ? "WhatsApp Business API Connected" : "WhatsApp Not Connected"}</div>
-                <div style={{ fontSize: 12, color: waConfig.connected ? "#047857" : "#B45309", marginTop: 2 }}>{waConfig.connected ? "Your agent is ready to receive messages" : "Add your Meta credentials below to connect"}</div>
-              </div>
-            </div>
-            {waConfig.connected && (
-              <div onClick={() => toggleLive("whatsapp")} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: waConfig.live ? "#10B981" : "#8E87A5" }}>{waConfig.live ? "Live" : "Test"}</span>
-                <div style={{ width: 44, height: 24, borderRadius: 12, background: waConfig.live ? "#10B981" : "#E8E5F0", padding: 2, transition: "all 0.25s", cursor: "pointer" }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 10, background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)", transform: waConfig.live ? "translateX(20px)" : "translateX(0)", transition: "all 0.25s" }} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Step 1: Meta Credentials */}
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 28 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: "#F0EDFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#8B5CF6", fontFamily: "'JetBrains Mono'" }}>1</div>
-              <h3 style={{ fontSize: 16, fontWeight: 600 }}>Meta API Credentials</h3>
-            </div>
-            <p style={{ fontSize: 13, color: "#8E87A5", marginBottom: 20, lineHeight: 1.6 }}>
-              Get these from <strong>Meta Business Suite → WhatsApp → API Setup</strong>. You need a Meta Business account with WhatsApp Business API access.
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>Phone Number ID *</label>
-                <input value={waConfig.phoneNumberId} onChange={e => setWaConfig(prev => ({ ...prev, phoneNumberId: e.target.value }))} placeholder="e.g., 100234567890123" style={inputStyle} />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>Business Account ID *</label>
-                <input value={waConfig.businessAccountId} onChange={e => setWaConfig(prev => ({ ...prev, businessAccountId: e.target.value }))} placeholder="e.g., 109876543210987" style={inputStyle} />
-              </div>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>Permanent Access Token *</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input value={waConfig.accessToken} onChange={e => setWaConfig(prev => ({ ...prev, accessToken: e.target.value }))} type={showToken ? "text" : "password"} placeholder="EAAxxxxxxxxxx..." style={{ ...inputStyle, flex: 1 }} />
-                <button onClick={() => setShowToken(!showToken)} style={{ ...btnOutline, padding: "8px 14px", fontSize: 12, whiteSpace: "nowrap" }}>{showToken ? "🙈 Hide" : "👁️ Show"}</button>
-              </div>
-              <p style={{ fontSize: 11, color: "#C4BED6", marginTop: 6 }}>Generate a permanent token from Meta Business Settings → System Users</p>
-            </div>
-          </div>
-
-          {/* Step 2: Webhook */}
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 28 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: "#FFF4EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#F97316", fontFamily: "'JetBrains Mono'" }}>2</div>
-              <h3 style={{ fontSize: 16, fontWeight: 600 }}>Configure Webhook</h3>
-            </div>
-            <p style={{ fontSize: 13, color: "#8E87A5", marginBottom: 20, lineHeight: 1.6 }}>
-              Add these to <strong>Meta App Dashboard → WhatsApp → Configuration → Webhook</strong>
-            </p>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>Callback URL</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                <div style={{ flex: 1, padding: "11px 16px", background: "#FAFBFD", border: "1.5px solid #E8E5F0", borderRadius: 10, fontSize: 13, fontFamily: "'JetBrains Mono'", color: "#4A4362", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{webhookUrl}</div>
-                <button onClick={() => copyToClipboard(webhookUrl)} style={{ ...btnOutline, padding: "8px 14px", fontSize: 12 }}>📋 Copy</button>
-              </div>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>Verify Token</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                <div style={{ flex: 1, padding: "11px 16px", background: "#FAFBFD", border: "1.5px solid #E8E5F0", borderRadius: 10, fontSize: 13, fontFamily: "'JetBrains Mono'", color: "#4A4362" }}>{"agntpro_verify_" + agentIdShort}</div>
-                <button onClick={() => copyToClipboard("agntpro_verify_" + agentIdShort)} style={{ ...btnOutline, padding: "8px 14px", fontSize: 12 }}>📋 Copy</button>
-              </div>
-            </div>
-            <div style={{ background: "#F8F7FC", borderRadius: 10, padding: 14 }}>
-              <p style={{ fontSize: 12, color: "#8E87A5", lineHeight: 1.6 }}>
-                <strong style={{ color: "#4A4362" }}>Subscribed fields:</strong> messages, messaging_postbacks, message_deliveries, message_reads
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3: Test */}
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 28 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: "#ECFDF5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#10B981", fontFamily: "'JetBrains Mono'" }}>3</div>
-              <h3 style={{ fontSize: 16, fontWeight: 600 }}>Test Connection</h3>
-            </div>
-            <p style={{ fontSize: 13, color: "#8E87A5", marginBottom: 20, lineHeight: 1.6 }}>
-              Verify that your credentials are correct and AgntPro can send/receive messages through your WhatsApp Business account.
-            </p>
-            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <button onClick={() => testConnection("whatsapp")} disabled={testStatus === "testing"} style={{ ...btnPrimary, background: testStatus === "success" ? "#10B981" : testStatus === "error" ? "#F43F5E" : "#8B5CF6", opacity: testStatus === "testing" ? 0.7 : 1 }}>
-                {testStatus === "testing" ? "⏳ Testing..." : testStatus === "success" ? "✅ Connected!" : testStatus === "error" ? "❌ Failed — Check Credentials" : "🔗 Test Connection"}
-              </button>
-              <button onClick={saveConfig} style={btnOutline}>Save & Continue</button>
-            </div>
-          </div>
-
-          {/* How it works info */}
-          <div style={{ background: "#F0EDFF", border: "1px solid #DDD6FE", borderRadius: 14, padding: 24 }}>
-            <h4 style={{ fontSize: 14, fontWeight: 600, color: "#5B21B6", marginBottom: 12 }}>🔄 How AgntPro connects to WhatsApp</h4>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-              {[
-                { step: "1", title: "User sends message", desc: "Customer messages your WhatsApp Business number" },
-                { step: "2", title: "AgntPro processes", desc: "Our webhook receives the message, runs your AI agent with KB context" },
-                { step: "3", title: "Agent replies", desc: "AI response is sent back via WhatsApp Business API automatically" },
-              ].map((s, i) => (
-                <div key={i} style={{ textAlign: "center" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "#8B5CF6", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px", fontSize: 14, fontWeight: 700 }}>{s.step}</div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#5B21B6", marginBottom: 4 }}>{s.title}</div>
-                  <div style={{ fontSize: 12, color: "#7C3AED", lineHeight: 1.5 }}>{s.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* RCS Config */}
-      {activeChannel === "rcs" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ background: rcsConfig.connected ? "#ECFDF5" : "#FFF7ED", border: `1px solid ${rcsConfig.connected ? "#A7F3D0" : "#FED7AA"}`, borderRadius: 14, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <span style={{ fontSize: 20 }}>{rcsConfig.connected ? "✅" : "⚠️"}</span>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: rcsConfig.connected ? "#065F46" : "#92400E" }}>{rcsConfig.connected ? "RCS Business Messaging Connected" : "RCS Not Connected"}</div>
-                <div style={{ fontSize: 12, color: rcsConfig.connected ? "#047857" : "#B45309", marginTop: 2 }}>{rcsConfig.connected ? "Your agent is ready on RCS" : "Configure your Google RCS Business Messaging agent"}</div>
-              </div>
-            </div>
-            {rcsConfig.connected && (
-              <div onClick={() => toggleLive("rcs")} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", userSelect: "none" }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: rcsConfig.live ? "#10B981" : "#8E87A5" }}>{rcsConfig.live ? "Live" : "Test"}</span>
-                <div style={{ width: 44, height: 24, borderRadius: 12, background: rcsConfig.live ? "#10B981" : "#E8E5F0", padding: 2, transition: "all 0.25s", cursor: "pointer" }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 10, background: "#fff", boxShadow: "0 1px 3px rgba(0,0,0,0.15)", transform: rcsConfig.live ? "translateX(20px)" : "translateX(0)", transition: "all 0.25s" }} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 28 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Google RCS Business Messaging Credentials</h3>
-            <p style={{ fontSize: 13, color: "#8E87A5", marginBottom: 20, lineHeight: 1.6 }}>
-              Get these from <strong>Google Business Communications Console</strong>. You need a verified RCS Business Messaging agent.
-            </p>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>RCS Agent ID *</label>
-              <input value={rcsConfig.agentId} onChange={e => setRcsConfig(prev => ({ ...prev, agentId: e.target.value }))} placeholder="e.g., brands/your-brand/agents/your-agent" style={inputStyle} />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: "#4A4362", display: "block", marginBottom: 6 }}>Service Account Key (JSON) *</label>
-              <textarea value={rcsConfig.serviceAccountKey} onChange={e => setRcsConfig(prev => ({ ...prev, serviceAccountKey: e.target.value }))} placeholder='Paste your service account JSON key here...' rows={4} style={{ ...inputStyle, fontFamily: "'JetBrains Mono'", fontSize: 12, resize: "vertical", lineHeight: 1.6 }} />
-            </div>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => testConnection("rcs")} disabled={testStatus === "testing"} style={{ ...btnPrimary, background: testStatus === "success" ? "#10B981" : "#8B5CF6" }}>
-                {testStatus === "testing" ? "⏳ Testing..." : testStatus === "success" ? "✅ Connected!" : "🔗 Test Connection"}
-              </button>
-              <button onClick={saveConfig} style={btnOutline}>Save</button>
-            </div>
-          </div>
-
-          <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 14, padding: 20 }}>
-            <h4 style={{ fontSize: 14, fontWeight: 600, color: "#1E40AF", marginBottom: 8 }}>📱 RCS vs WhatsApp</h4>
-            <p style={{ fontSize: 13, color: "#1E40AF", lineHeight: 1.7 }}>RCS delivers app-like rich messaging directly in the native SMS app — no app download needed. Supports carousels, suggested actions, rich cards, and branded sender profiles. Works on 1.2B+ devices worldwide.</p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================
-// SETTINGS VIEW
-// ============================================================
-function SettingsView({ agent, updateAgent }) {
-  const [prompt, setPrompt] = useState(agent.prompt);
-  const [name, setName] = useState(agent.name);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => { setPrompt(agent.prompt); setName(agent.name); }, [agent.id]);
-
-  function handleSave() {
-    updateAgent(agent.id, { prompt, name });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  }
-
-  return (
-    <div style={{ padding: "28px 32px", maxWidth: 1000 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
-        <div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5, marginBottom: 4 }}>Agent Configuration</h1>
-          <p style={{ fontSize: 14, color: "#8E87A5" }}>Customize <strong>{agent.name}</strong></p>
-        </div>
-        <button onClick={handleSave} style={{ ...btnPrimary, background: saved ? "#10B981" : "#8B5CF6" }}>{saved ? "✓ Saved!" : "Save Changes"}</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 24 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>Agent Name</label>
-            <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={{ fontSize: 13, fontWeight: 600, display: "block", marginBottom: 6 }}>System Prompt</label>
-            <p style={{ fontSize: 12, color: "#8E87A5", marginBottom: 8 }}>Core instruction that defines behavior, tone, and capabilities.</p>
-            <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={18} style={{ ...inputStyle, fontFamily: "'JetBrains Mono', monospace", fontSize: 13, resize: "vertical", lineHeight: 1.7 }} />
-            <div style={{ fontSize: 11, color: "#C4BED6", textAlign: "right", marginTop: 4 }}>{prompt.length} characters</div>
-          </div>
-        </div>
-        <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 14, padding: 20, height: "fit-content" }}>
-          <h4 style={{ fontSize: 14, fontWeight: 600, color: "#92400E", marginBottom: 12 }}>✏️ Prompt Tips</h4>
-          <div style={{ fontSize: 13, color: "#92400E", lineHeight: 2 }}>
-            <p>• Start with role and company</p>
-            <p>• List capabilities clearly</p>
-            <p>• Define the tone</p>
-            <p>• Add guardrails</p>
-            <p>• Include sample data</p>
-            <p>• Specify escalation rules</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// ANALYTICS
-// ============================================================
-function AnalyticsView({ agent }) {
-  const stats = [
-    { label: "Total Conversations", value: agent.conversations?.length || 0, icon: "💬", color: "#8B5CF6" },
-    { label: "KB Documents", value: agent.knowledgeBase?.length || 0, icon: "📚", color: "#3B82F6" },
-    { label: "Avg Response Time", value: "1.2s", icon: "⚡", color: "#F97316" },
-    { label: "Resolution Rate", value: "89%", icon: "✅", color: "#10B981" },
-  ];
-
-  return (
-    <div style={{ padding: "28px 32px", maxWidth: 1000 }}>
-      <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -0.5, marginBottom: 4 }}>Analytics</h1>
-      <p style={{ fontSize: 14, color: "#8E87A5", marginBottom: 28 }}>Performance for <strong>{agent.name}</strong></p>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
-        {stats.map((s, i) => (
-          <div key={i} style={{ background: "#fff", borderRadius: 14, border: "1px solid #E8E5F0", padding: 24, textAlign: "center" }}>
-            <div style={{ width: 48, height: 48, borderRadius: 14, background: s.color + "15", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontSize: 22 }}>{s.icon}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'JetBrains Mono'" }}>{s.value}</div>
-            <div style={{ fontSize: 13, color: "#8E87A5", marginTop: 4 }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #E8E5F0", padding: 48, textAlign: "center" }}>
-        <span style={{ fontSize: 48, display: "block", marginBottom: 16 }}>📊</span>
-        <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Detailed Analytics Coming Soon</h3>
-        <p style={{ fontSize: 14, color: "#8E87A5" }}>Conversation logs, sentiment analysis, funnel metrics, and custom reports.</p>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// MODAL
-// ============================================================
-function Modal({ children, onClose, title }) {
-  return (
-    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(26,16,53,0.5)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2000, padding: 24 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#fff", borderRadius: 20, boxShadow: "0 20px 60px rgba(0,0,0,0.15)", width: "100%", maxWidth: 520, padding: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700 }}>{title}</h2>
-          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid #E8E5F0", background: "transparent", cursor: "pointer", fontSize: 14, color: "#8E87A5", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// SHARED STYLES
-// ============================================================
-const btnPrimary = { background: "#8B5CF6", color: "#fff", border: "none", padding: "10px 24px", borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit', sans-serif", whiteSpace: "nowrap" };
-const btnSecondary = { background: "#F0EDFF", color: "#8B5CF6", border: "none", padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit', sans-serif" };
-const btnOutline = { background: "#fff", color: "#4A4362", border: "1.5px solid #E8E5F0", padding: "8px 18px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'Outfit', sans-serif" };
-const cardStyle = { background: "#fff", borderRadius: 14, border: "1px solid #E8E5F0", padding: 20 };
-const cardTitle = { fontSize: 14, fontWeight: 600, color: "#1A1035", marginBottom: 12 };
-const inputStyle = { width: "100%", padding: "11px 16px", border: "1.5px solid #E8E5F0", borderRadius: 10, fontSize: 14, fontFamily: "'Outfit', sans-serif", outline: "none", background: "#FAFBFD" };
-
-// ============================================================
-// RENDER
-// ============================================================
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+const bp={background:"#2563EB",color:"#fff",border:"none",padding:"9px 20px",borderRadius:8,fontSize:13,fontWeight:600,whiteSpace:"nowrap"};
+const bs={background:"#EFF6FF",color:"#2563EB",border:"none",padding:"7px 16px",borderRadius:7,fontSize:12,fontWeight:600};
+const bo={background:"#fff",color:"#3D3A34",border:"1.5px solid #E6E3DC",padding:"7px 16px",borderRadius:7,fontSize:12,fontWeight:500};
+const inp={width:"100%",padding:"10px 14px",border:"1.5px solid #E6E3DC",borderRadius:8,fontSize:13,fontFamily:"'Sora'",outline:"none",background:"#FAFAF8"};
+const lbl={fontSize:11,fontWeight:600,color:"#3D3A34",display:"block",marginBottom:5};
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
