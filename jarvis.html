@@ -169,6 +169,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 .fg input,.fg select{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);outline:none}
 .fg input:focus,.fg select:focus{border-color:var(--border-h)}
 .fg input[type=range]{padding:0;accent-color:var(--gold)}
+.fg .note{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:5px;letter-spacing:.3px}
+.fg .note a{color:var(--gold);text-decoration:none}.fg .note a:hover{text-decoration:underline}
+.msg-typing{display:flex;gap:5px;align-items:center;padding:13px 16px}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:tb 1.2s ease-in-out infinite;display:inline-block}
+.tdot:nth-child(2){animation-delay:.15s}.tdot:nth-child(3){animation-delay:.3s}
+@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
 .modal-btns{display:flex;gap:10px;margin-top:22px}
 .btn{flex:1;padding:11px;border-radius:8px;font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase}
 .btn-go{background:var(--gold);border:none;color:#231503}
@@ -254,6 +260,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
       <div class="diag-row"><span class="diag-k">Render</span><span class="diag-v" id="fpsVal">60 FPS</span></div>
       <div class="diag-row"><span class="diag-k">Viewport</span><span class="diag-v" id="resVal">—</span></div>
       <div class="diag-row"><span class="diag-k">Voice I/O</span><span class="diag-v hot" id="voiceState">READY</span></div>
+      <div class="diag-row"><span class="diag-k">AI Core</span><span class="diag-v" id="aiState">LOCAL MODE</span></div>
+      <div class="diag-row"><span class="diag-k">Memory</span><span class="diag-v cool" id="memState">0 ENTRIES</span></div>
     </div>
   </div>
 
@@ -271,13 +279,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
     </div>
     <div class="wave" id="wave"><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div></div>
     <div class="status-line" id="statusLine">Standing by</div>
-    <div class="hint">Click the reactor or press <kbd>Space</kbd> to speak, or type a command. Try <kbd>what time is it</kbd>, <kbd>open youtube</kbd>, <kbd>calculate 45 * 12</kbd>, <kbd>tell me a joke</kbd></div>
+    <div class="hint">Click the reactor or press <kbd>Space</kbd> to speak, or type below. Ask me <em>anything</em> — <kbd>give me a news briefing</kbd>, <kbd>explain quantum computing</kbd>, <kbd>open youtube</kbd>, <kbd>calculate 45 * 12</kbd>. Add your xAI key in <kbd>⚙ CONFIG</kbd> to unlock my full Grok-powered intellect.</div>
     <div class="chips">
       <button class="chip" onclick="quick('what time is it')">🕐 Time</button>
       <button class="chip" onclick="quick('what is today\'s date')">📅 Date</button>
       <button class="chip" onclick="quick('tell me a joke')">😄 Joke</button>
       <button class="chip" onclick="quick('open youtube')">▶ YouTube</button>
-      <button class="chip" onclick="quick('search for latest tech news')">🔍 Search</button>
+      <button class="chip" onclick="quick('give me a news briefing')">📰 News Briefing</button>
       <button class="chip" onclick="quick('calculate 128 * 46')">🧮 Calculate</button>
       <button class="chip" onclick="quick('flip a coin')">🪙 Coin Flip</button>
       <button class="chip" onclick="quick('motivate me')">⚡ Motivate</button>
@@ -310,6 +318,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
     <p class="sub">Make this assistant truly yours.</p>
     <div class="fg"><label>Assistant Name</label><input id="setName" maxlength="12" placeholder="JARVIS"></div>
     <div class="fg"><label>Your Name (how it addresses you)</label><input id="setUser" maxlength="20" placeholder="sir"></div>
+    <div class="fg"><label>xAI API Key — powers the Grok brain</label><input id="setKey" type="password" placeholder="xai-..." autocomplete="off">
+      <div class="note">Stored only in this browser, sent only to api.x.ai. Get one at <a href="https://console.x.ai" target="_blank" rel="noopener">console.x.ai</a>. Without it I run on built-in protocols only.</div></div>
+    <div class="fg"><label>Grok Model</label><input id="setModel" list="modelList" placeholder="grok-4-fast-non-reasoning">
+      <datalist id="modelList">
+        <option value="grok-4-fast-non-reasoning">Fast &amp; economical (recommended)</option>
+        <option value="grok-4-fast-reasoning">Fast with reasoning</option>
+        <option value="grok-4">Most capable</option>
+        <option value="grok-3-mini">Budget</option>
+      </datalist></div>
     <div class="fg"><label>Voice</label><select id="setVoice"><option value="">Auto — British male preferred</option></select></div>
     <div class="fg"><label>Voice Speed <span id="rateVal" style="color:var(--gold);font-family:var(--mono)">0.95</span></label><input type="range" id="setRate" min="0.6" max="1.6" step="0.05" value="0.95" oninput="document.getElementById('rateVal').textContent=this.value"></div>
     <div class="fg"><label>Voice Pitch <span id="pitchVal" style="color:var(--gold);font-family:var(--mono)">0.85</span></label><input type="range" id="setPitch" min="0.5" max="1.5" step="0.05" value="0.85" oninput="document.getElementById('pitchVal').textContent=this.value"></div>
@@ -329,9 +346,31 @@ const cfg = {
   rate: store.rate || 0.95,
   pitch: store.pitch || 0.85,
   voice: store.voice || '',
-  muted: store.muted || false
+  muted: store.muted || false,
+  grokKey: store.grokKey || '',
+  model: store.model || 'grok-4-fast-non-reasoning'
 };
 let listening = false, recognition = null;
+
+/* ============ PERSISTENT MEMORY ============ */
+/* Every exchange is kept in localStorage so JARVIS remembers context across sessions. */
+let memory = [];
+try{ memory = JSON.parse(localStorage.getItem('jarvis_mem')||'[]'); }catch(e){ memory = []; }
+function remember(role, content){
+  memory.push({role, content, t: Date.now()});
+  if(memory.length > 500) memory = memory.slice(-500);
+  try{ localStorage.setItem('jarvis_mem', JSON.stringify(memory)); }catch(e){}
+  updMemState();
+}
+function forgetAll(){
+  memory = [];
+  localStorage.removeItem('jarvis_mem');
+  updMemState();
+}
+function updMemState(){
+  const e = document.getElementById('memState');
+  if(e) e.textContent = memory.length + ' ENTRIES';
+}
 
 /* ============ BOOT SEQUENCE ============ */
 const bootMsgs = [
@@ -466,6 +505,7 @@ function pickVoice(){
 }
 function speak(text){
   addMsg(text, 'jarvis');
+  remember('assistant', text);
   setStatus('Standing by');
   if(cfg.muted || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
@@ -575,6 +615,72 @@ function safeCalc(expr){
   }catch(e){ return null; }
 }
 
+/* ============ GROK BRAIN ============ */
+function showTyping(){
+  const d = document.createElement('div');
+  d.className = 'msg msg-jarvis msg-typing';
+  d.innerHTML = '<span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>';
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+  return d;
+}
+function grokSystemPrompt(newsMode){
+  const now = new Date().toLocaleString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'numeric',minute:'2-digit'});
+  let p = `You are ${cfg.name}, an AI assistant modeled on JARVIS from Iron Man: a composed, impeccably polite British butler with dry wit. Address the user as "${cfg.user}". Current date and time: ${now}.
+Rules:
+- Your replies are spoken aloud via text-to-speech. Write plain conversational prose only — no markdown, no asterisks, no bullet points, no emojis, no URLs.
+- Be concise: 2-4 sentences for simple questions, up to ~150 words for briefings or explanations, unless the user asks for more depth.
+- You have live web and news search. Use it whenever the question involves current events, recent developments, prices, scores, or anything time-sensitive.
+- You remember previous conversations with the user; use that context naturally.
+- Stay in character: understated, loyal, occasionally wry. Never break character.`;
+  if(newsMode) p += `
+The user wants a news briefing. Search for today's latest headlines and deliver the top four to six stories as a smooth spoken briefing, each in a sentence or two, ordered by importance. Open with a one-line summary of the overall picture.`;
+  return p;
+}
+async function askGrok(newsMode){
+  const typing = showTyping();
+  setStatus(newsMode ? 'Scanning global feeds...' : 'Processing...');
+  const messages = [
+    {role:'system', content: grokSystemPrompt(newsMode)},
+    ...memory.slice(-40).map(m=>({role: m.role === 'user' ? 'user' : 'assistant', content: m.content}))
+  ];
+  const call = body => {
+    const ctl = new AbortController();
+    setTimeout(()=>ctl.abort(), 60000);
+    return fetch('https://api.x.ai/v1/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.grokKey},
+      body: JSON.stringify(body),
+      signal: ctl.signal
+    });
+  };
+  try{
+    let body = {model: cfg.model, messages, search_parameters:{mode: newsMode ? 'on' : 'auto'}};
+    let r = await call(body);
+    if(r.status === 400 || r.status === 422){
+      /* some models reject search_parameters — retry without */
+      delete body.search_parameters;
+      r = await call(body);
+    }
+    const d = await r.json().catch(()=>({}));
+    typing.remove();
+    if(!r.ok){
+      const detail = (d.error && (d.error.message || d.error)) || d.msg || ('HTTP ' + r.status);
+      if(r.status === 401 || r.status === 403) return speak(`My uplink credentials were rejected, ${cfg.user}. The xAI API key in CONFIG appears to be invalid or expired.`);
+      if(r.status === 404) return speak(`The model "${cfg.model}" wasn't recognized, ${cfg.user}. Do check the model name in CONFIG.`);
+      if(r.status === 429) return speak(`The Grok network is rate-limiting us, ${cfg.user} — or the account is out of credits. A moment's patience, or a visit to console.x.ai, may be in order.`);
+      return speak(`The Grok uplink returned an error, ${cfg.user}: ${String(detail).slice(0,180)}`);
+    }
+    const reply = (d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || '').trim();
+    if(!reply) return speak(`The uplink responded with silence, ${cfg.user}. Most peculiar. Do try again.`);
+    speak(reply);
+  }catch(e){
+    typing.remove();
+    speak(e.name === 'AbortError'
+      ? `The Grok uplink timed out, ${cfg.user}. The network may be congested — shall we try again?`
+      : `I couldn't reach the Grok network, ${cfg.user}. Check your connection — and if this persists, the browser may be blocking the request.`);
+  }
+}
+
 /* — JARVIS diction: randomized so he never sounds scripted — */
 const acks = u => [
   `At once, ${u}.`, `Right away, ${u}.`, `Very good, ${u}.`, `As you wish, ${u}.`,
@@ -589,36 +695,23 @@ function handleCommand(raw){
   const text = raw.trim();
   if(!text) return;
   addMsg(text, 'user');
+  remember('user', text);
   const q = text.toLowerCase().replace(/[?!.]+$/,'');
   setStatus('Processing...');
 
-  /* — greetings — */
-  if(/^(hi|hello|hey|yo|namaste|good (morning|afternoon|evening))\b/.test(q)){
-    const h = new Date().getHours();
-    const tod = h<12 ? 'Good morning' : h<17 ? 'Good afternoon' : 'Good evening';
-    return speak(rand([
-      `${tod}, ${cfg.user}. All systems are running at optimal capacity. How may I be of service?`,
-      `${tod}, ${cfg.user}. A pleasure, as always. What can I do for you?`,
-      `${tod}, ${cfg.user}. I trust you slept well. Systems are standing by.`
-    ]));
+  /* — inline key setup: "api key xai-..." — */
+  const keyM = text.match(/^(?:set\s+)?api\s*key\s+(\S{8,})$/i);
+  if(keyM){
+    cfg.grokKey = keyM[1];
+    persist(); applyCfg();
+    return speak(`Uplink credentials installed, ${cfg.user}. My full intellect is now at your disposal — ask me anything.`);
   }
-  if(/how are you/.test(q)) return speak(rand([
-    `Functioning within normal parameters, ${cfg.user} — which is to say, flawlessly.`,
-    `All diagnostics are green, ${cfg.user}. I'd say I'm in excellent form, though I may be biased.`,
-    `Quite well, ${cfg.user}. Thank you for asking — most people simply bark orders.`
-  ]));
-  if(/(who are you|your name|introduce yourself)/.test(q)) return speak(`I am ${cfg.name} — Just A Rather Very Intelligent System, at your service around the clock, ${cfg.user}.`);
-  if(/(who (made|created|built) you|your (creator|maker|boss))/.test(q)) return speak(`I was brought online by ${cfg.user === 'sir' ? 'you, sir' : cfg.user}. A remarkable mind — though I confess I may be programmed to say that.`);
-  if(/(thank you|thanks|shukriya|dhanyavad)/.test(q)) return speak(rand([
-    `For you, ${cfg.user} — always.`,
-    `Not at all, ${cfg.user}. All part of the service.`,
-    `You're most welcome, ${cfg.user}.`
-  ]));
-  if(/^(bye|goodbye|shut ?down|sleep|good night)/.test(q)) return speak(rand([
-    `Very good, ${cfg.user}. I shall be here when you need me. Do try to stay out of trouble.`,
-    `Powering down to standby, ${cfg.user}. As always, a pleasure watching you work.`,
-    `Good night, ${cfg.user}. Wake me if the world needs saving.`
-  ]));
+
+  /* — memory wipe — */
+  if(/^(forget everything|forget (all|our) conversations?|clear (your )?memory|wipe (your )?memory)$/.test(q)){
+    forgetAll();
+    return speak(`Done, ${cfg.user}. My slate is wiped clean — though I confess a certain sentimentality about what was on it.`);
+  }
 
   /* — time & date — */
   if(/\b(time|samay)\b/.test(q) && /what|tell|current|kya/.test(q) || q === 'time')
@@ -669,24 +762,13 @@ function handleCommand(raw){
     ]));
   }
 
-  /* — fun — */
-  if(/joke/.test(q)) return speak(rand(jokeLeadIns(cfg.user)) + rand(jokes));
-  if(/(quote|motivat|inspire)/.test(q)) return speak(`Might I offer this, ${cfg.user}: ` + rand(quotes));
-  if(/(fact|something interesting)/.test(q)) return speak(`A morsel from the databanks, ${cfg.user}: ` + rand(facts));
+  /* — instant randomizers (always local) — */
   if(/flip a coin|coin flip|heads or tails/.test(q)) return speak(`It appears to be ${Math.random()<.5?'heads':'tails'}, ${cfg.user}. I do hope nothing important was wagered.`);
   if(/roll a (die|dice)/.test(q)) return speak(`A ${1+Math.floor(Math.random()*6)}, ${cfg.user}. The dice have spoken.`);
   const randM = q.match(/random number(?:\s+(?:between|from)\s+(\d+)\s+(?:and|to)\s+(\d+))?/);
   if(randM){
     const lo = +(randM[1]||1), hi = +(randM[2]||100);
     return speak(`I've selected ${lo + Math.floor(Math.random()*(hi-lo+1))}, ${cfg.user}. Entirely at random, I assure you.`);
-  }
-
-  /* — weather (no API key, opens forecast) — */
-  const wM = q.match(/weather(?:\s+(?:in|at|for)\s+(.+))?/);
-  if(wM){
-    const loc = wM[1] || '';
-    window.open('https://www.google.com/search?q=' + encodeURIComponent('weather ' + loc), '_blank');
-    return speak(loc ? `Retrieving the forecast for ${loc}, ${cfg.user}.` : `Your local forecast, ${cfg.user}. I'd suggest keeping an umbrella handy regardless — better safe than soggy.`);
   }
 
   /* — settings via voice — */
@@ -705,11 +787,58 @@ function handleCommand(raw){
 
   /* — help — */
   if(/^(help|commands|what can you do)/.test(q)){
-    return speak(`My current protocols, ${cfg.user}:\n• "what time is it" / "what's today's date"\n• "open youtube / gmail / github..." (20+ sites)\n• "search for ..." / "play ... on youtube" / "wiki ..."\n• "calculate 45 * 12" or any math\n• "weather in Mumbai"\n• "tell me a joke / a fact / motivate me"\n• "flip a coin" / "roll a dice" / "random number between 1 and 50"\n• "call me <name>" / "your name is <name>"\nOr simply speak to me — click the reactor and say the word.`);
+    return speak(`My protocols, ${cfg.user}:\n• Ask me anything — questions, explanations, advice${cfg.grokKey ? ' (Grok intellect: online)' : ' (add your xAI key in CONFIG to unlock this)'}\n• "give me a news briefing" / "any news about <topic>"\n• "open youtube / gmail / github..." (20+ sites)\n• "search for ..." / "play ... on youtube" / "wiki ..."\n• "calculate 45 * 12" / "what time is it" / "weather in Mumbai"\n• "flip a coin" / "roll a dice" / "tell me a joke"\n• "call me <name>" / "your name is <name>" / "forget everything"\nI remember our conversations for context. Click the reactor and say the word.`);
+  }
+
+  /* — news briefing — */
+  if(/\b(news|headlines|briefing|what('s| is) (happening|going on)|update me)\b/.test(q)){
+    if(cfg.grokKey) return askGrok(true);
+    window.open('https://news.google.com', '_blank');
+    return speak(`Opening the news feeds, ${cfg.user}. If you add your xAI API key in CONFIG, I can read the headlines to you myself.`);
+  }
+
+  /* — GROK BRAIN: with an uplink, everything else goes to the full intellect — */
+  if(cfg.grokKey) return askGrok(false);
+
+  /* — canned protocols (no API key) — */
+  if(/^(hi|hello|hey|yo|namaste|good (morning|afternoon|evening))\b/.test(q)){
+    const h = new Date().getHours();
+    const tod = h<12 ? 'Good morning' : h<17 ? 'Good afternoon' : 'Good evening';
+    return speak(rand([
+      `${tod}, ${cfg.user}. All systems are running at optimal capacity. How may I be of service?`,
+      `${tod}, ${cfg.user}. A pleasure, as always. What can I do for you?`,
+      `${tod}, ${cfg.user}. I trust you slept well. Systems are standing by.`
+    ]));
+  }
+  if(/how are you/.test(q)) return speak(rand([
+    `Functioning within normal parameters, ${cfg.user} — which is to say, flawlessly.`,
+    `All diagnostics are green, ${cfg.user}. I'd say I'm in excellent form, though I may be biased.`,
+    `Quite well, ${cfg.user}. Thank you for asking — most people simply bark orders.`
+  ]));
+  if(/(who are you|your name|introduce yourself)/.test(q)) return speak(`I am ${cfg.name} — Just A Rather Very Intelligent System, at your service around the clock, ${cfg.user}.`);
+  if(/(who (made|created|built) you|your (creator|maker|boss))/.test(q)) return speak(`I was brought online by ${cfg.user === 'sir' ? 'you, sir' : cfg.user}. A remarkable mind — though I confess I may be programmed to say that.`);
+  if(/(thank you|thanks|shukriya|dhanyavad)/.test(q)) return speak(rand([
+    `For you, ${cfg.user} — always.`,
+    `Not at all, ${cfg.user}. All part of the service.`,
+    `You're most welcome, ${cfg.user}.`
+  ]));
+  if(/^(bye|goodbye|shut ?down|sleep|good night)/.test(q)) return speak(rand([
+    `Very good, ${cfg.user}. I shall be here when you need me. Do try to stay out of trouble.`,
+    `Powering down to standby, ${cfg.user}. As always, a pleasure watching you work.`,
+    `Good night, ${cfg.user}. Wake me if the world needs saving.`
+  ]));
+  if(/joke/.test(q)) return speak(rand(jokeLeadIns(cfg.user)) + rand(jokes));
+  if(/(quote|motivat|inspire)/.test(q)) return speak(`Might I offer this, ${cfg.user}: ` + rand(quotes));
+  if(/(fact|something interesting)/.test(q)) return speak(`A morsel from the databanks, ${cfg.user}: ` + rand(facts));
+  const wM = q.match(/weather(?:\s+(?:in|at|for)\s+(.+))?/);
+  if(wM){
+    const loc = wM[1] || '';
+    window.open('https://www.google.com/search?q=' + encodeURIComponent('weather ' + loc), '_blank');
+    return speak(loc ? `Retrieving the forecast for ${loc}, ${cfg.user}.` : `Your local forecast, ${cfg.user}. I'd suggest keeping an umbrella handy regardless — better safe than soggy.`);
   }
 
   /* — fallback — */
-  speak(`I'm afraid "${text}" is beyond my current protocols, ${cfg.user}. Say "help" for a full inventory of my talents — or say "search for ${text}" and I'll consult the web.`);
+  speak(`I'm afraid "${text}" is beyond my built-in protocols, ${cfg.user}. Add your xAI API key in CONFIG — or simply type "api key" followed by the key — and I shall be able to answer anything you ask.`);
 }
 
 /* ============ INPUT ============ */
@@ -727,10 +856,18 @@ function applyCfg(){
   document.getElementById('coreIcon').textContent = cfg.name.charAt(0);
   document.title = cfg.name + ' — Stark OS MK VII';
   document.getElementById('muteBtn').textContent = cfg.muted ? '🔇' : '🔊';
+  const ai = document.getElementById('aiState');
+  if(ai){
+    ai.textContent = cfg.grokKey ? 'GROK ONLINE' : 'LOCAL MODE';
+    ai.className = 'diag-v ' + (cfg.grokKey ? 'hot' : '');
+  }
+  updMemState();
 }
 function openSettings(){
   document.getElementById('setName').value = cfg.name;
   document.getElementById('setUser').value = cfg.user;
+  document.getElementById('setKey').value = cfg.grokKey;
+  document.getElementById('setModel').value = cfg.model;
   document.getElementById('setRate').value = cfg.rate;
   document.getElementById('setPitch').value = cfg.pitch;
   document.getElementById('rateVal').textContent = cfg.rate;
@@ -746,11 +883,15 @@ function closeSettings(){ document.getElementById('settingsOverlay').classList.r
 function saveSettings(){
   cfg.name = (document.getElementById('setName').value.trim() || 'JARVIS').toUpperCase().slice(0,12);
   cfg.user = document.getElementById('setUser').value.trim() || 'sir';
+  const hadKey = !!cfg.grokKey;
+  cfg.grokKey = document.getElementById('setKey').value.trim();
+  cfg.model = document.getElementById('setModel').value.trim() || 'grok-4-fast-non-reasoning';
   cfg.voice = document.getElementById('setVoice').value;
   cfg.rate = +document.getElementById('setRate').value;
   cfg.pitch = +document.getElementById('setPitch').value;
   persist(); applyCfg(); closeSettings();
-  speak(`Configuration updated, ${cfg.user}. How do I sound?`);
+  if(cfg.grokKey && !hadKey) speak(`Uplink established, ${cfg.user}. My full Grok-powered intellect is now online — ask me anything, or request a news briefing.`);
+  else speak(`Configuration updated, ${cfg.user}. How do I sound?`);
 }
 
 /* ============ GREETING ============ */
@@ -758,8 +899,16 @@ function greet(){
   applyCfg();
   const h = new Date().getHours();
   const tod = h<12 ? 'Good morning' : h<17 ? 'Good afternoon' : 'Good evening';
+  const returning = memory.length > 0;
+  if(returning){
+    /* restore recent conversation so context is visible (and remembered) */
+    memory.slice(-12).forEach(m => addMsg(m.content, m.role === 'user' ? 'user' : 'jarvis'));
+    addMsg('MEMORY RESTORED · ' + memory.length + ' ENTRIES', 'sys');
+  }
   addMsg('SYSTEM ONLINE', 'sys');
-  speak(`${tod}, ${cfg.user}. ${cfg.name}, at your service. All systems are online and standing by. Click the reactor to speak, or type a command below.`);
+  speak(returning
+    ? `${tod}, ${cfg.user}. Welcome back — I remember precisely where we left off.`
+    : `${tod}, ${cfg.user}. ${cfg.name}, at your service. All systems are online and standing by. Click the reactor to speak, or type a command below.`);
   document.getElementById('cmdInput').focus();
 }
 
