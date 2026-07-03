@@ -211,9 +211,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
     <h3>⚙ CONFIGURATION</h3>
     <p class="sub">Make this assistant truly yours.</p>
     <div class="fg"><label>Assistant Name</label><input id="setName" maxlength="12" placeholder="JARVIS"></div>
-    <div class="fg"><label>Your Name (how it addresses you)</label><input id="setUser" maxlength="20" placeholder="Boss"></div>
-    <div class="fg"><label>Voice Speed <span id="rateVal" style="color:var(--cyan);font-family:var(--mono)">1.0</span></label><input type="range" id="setRate" min="0.6" max="1.6" step="0.1" value="1" oninput="document.getElementById('rateVal').textContent=this.value"></div>
-    <div class="fg"><label>Voice Pitch <span id="pitchVal" style="color:var(--cyan);font-family:var(--mono)">1.0</span></label><input type="range" id="setPitch" min="0.5" max="1.5" step="0.1" value="1" oninput="document.getElementById('pitchVal').textContent=this.value"></div>
+    <div class="fg"><label>Your Name (how it addresses you)</label><input id="setUser" maxlength="20" placeholder="sir"></div>
+    <div class="fg"><label>Voice</label><select id="setVoice"><option value="">Auto — British male preferred</option></select></div>
+    <div class="fg"><label>Voice Speed <span id="rateVal" style="color:var(--cyan);font-family:var(--mono)">0.95</span></label><input type="range" id="setRate" min="0.6" max="1.6" step="0.05" value="0.95" oninput="document.getElementById('rateVal').textContent=this.value"></div>
+    <div class="fg"><label>Voice Pitch <span id="pitchVal" style="color:var(--cyan);font-family:var(--mono)">0.85</span></label><input type="range" id="setPitch" min="0.5" max="1.5" step="0.05" value="0.85" oninput="document.getElementById('pitchVal').textContent=this.value"></div>
     <div class="modal-btns">
       <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-go" onclick="saveSettings()">Save</button>
@@ -226,9 +227,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 const store = JSON.parse(localStorage.getItem('jarvis_cfg')||'{}');
 const cfg = {
   name: store.name || 'JARVIS',
-  user: store.user || 'Boss',
-  rate: store.rate || 1,
-  pitch: store.pitch || 1,
+  user: store.user || 'sir',
+  rate: store.rate || 0.95,
+  pitch: store.pitch || 0.85,
+  voice: store.voice || '',
   muted: store.muted || false
 };
 let listening = false, recognition = null;
@@ -239,7 +241,8 @@ const bootMsgs = [
   '> Loading voice synthesis module.......OK',
   '> Calibrating speech recognition.......OK',
   '> Establishing HUD interface...........OK',
-  '> All systems nominal. Welcome back.'
+  '> Loading etiquette protocols..........OK',
+  '> All systems nominal. Welcome back, sir.'
 ];
 (function boot(){
   const el = document.getElementById('bootLines'), fill = document.getElementById('bootFill');
@@ -286,6 +289,25 @@ function setStatus(s){ document.getElementById('statusLine').textContent = s; }
 function clearLog(){ log.innerHTML=''; addMsg('LOG CLEARED','sys'); }
 
 /* ============ SPEECH OUTPUT ============ */
+/* Rank available voices so JARVIS sounds like JARVIS: a composed British male.
+   Edge has "Ryan (Natural)", Chrome has "Google UK English Male", macOS has Daniel. */
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  if(!vs.length) return null;
+  if(cfg.voice){ const m = vs.find(v=>v.name===cfg.voice); if(m) return m; }
+  const rank = v=>{
+    const n = v.name.toLowerCase(), gb = /en[-_](gb|uk)/i.test(v.lang);
+    if(/uk english male/.test(n)) return 0;
+    if(gb && /(ryan|daniel|george|arthur|brian|oliver|thomas|alfie)/.test(n)) return 0;
+    if(gb && /male/.test(n)) return 1;
+    if(gb && /(natural|online|neural)/.test(n)) return 2;
+    if(gb) return 3;
+    if(/^en/i.test(v.lang) && /(male|david|guy|mark|james)/.test(n)) return 4;
+    if(/^en/i.test(v.lang)) return 5;
+    return 6;
+  };
+  return vs.slice().sort((a,b)=>rank(a)-rank(b))[0];
+}
 function speak(text){
   addMsg(text, 'jarvis');
   setStatus('Standing by');
@@ -293,10 +315,7 @@ function speak(text){
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text.replace(/[🕐📅😄▶🔍🧮🪙⚡❓•]/g,''));
   u.rate = cfg.rate; u.pitch = cfg.pitch;
-  const voices = speechSynthesis.getVoices();
-  const v = voices.find(v=>/en[-_](GB|UK)/i.test(v.lang) && /male|daniel|george/i.test(v.name))
-        || voices.find(v=>/en[-_]GB/i.test(v.lang))
-        || voices.find(v=>/^en/i.test(v.lang));
+  const v = pickVoice();
   if(v) u.voice = v;
   const reactor = document.getElementById('reactor'), wave = document.getElementById('wave');
   u.onstart = ()=>{ reactor.classList.add('speaking'); wave.classList.add('on'); setStatus('Speaking...'); };
@@ -324,7 +343,7 @@ function initRecognition(){
   };
   r.onerror = e => {
     stopMic();
-    if(e.error === 'not-allowed') speak('I need microphone permission to hear you, ' + cfg.user + '. You can still type commands.');
+    if(e.error === 'not-allowed') speak('I require microphone access to hear you, ' + cfg.user + '. Until then, the keyboard will have to suffice.');
     else if(e.error !== 'aborted') setStatus('Mic error: ' + e.error);
   };
   r.onend = ()=>{ if(listening) stopMic(); };
@@ -334,7 +353,7 @@ function toggleMic(){
   if(listening){ stopMic(); return; }
   if(!recognition) recognition = initRecognition();
   if(!recognition){
-    speak('Voice recognition is not supported in this browser, ' + cfg.user + '. Please use Chrome or Edge, or type your command.');
+    speak('I regret to report this browser lacks voice recognition, ' + cfg.user + '. Chrome or Edge would serve us better — or simply type your command.');
     return;
   }
   listening = true;
@@ -400,6 +419,16 @@ function safeCalc(expr){
   }catch(e){ return null; }
 }
 
+/* — JARVIS diction: randomized so he never sounds scripted — */
+const acks = u => [
+  `At once, ${u}.`, `Right away, ${u}.`, `Very good, ${u}.`, `As you wish, ${u}.`,
+  `Consider it done, ${u}.`, `Of course, ${u}.`
+];
+const jokeLeadIns = u => [
+  `If you insist, ${u}: `, `Ahem. `, `I shall attempt humour, ${u}. `, `Prepare yourself, ${u}: `, ``
+];
+const ack = u => rand(acks(u));
+
 function handleCommand(raw){
   const text = raw.trim();
   if(!text) return;
@@ -411,19 +440,35 @@ function handleCommand(raw){
   if(/^(hi|hello|hey|yo|namaste|good (morning|afternoon|evening))\b/.test(q)){
     const h = new Date().getHours();
     const tod = h<12 ? 'Good morning' : h<17 ? 'Good afternoon' : 'Good evening';
-    return speak(`${tod}, ${cfg.user}. All systems are online. How can I assist you?`);
+    return speak(rand([
+      `${tod}, ${cfg.user}. All systems are running at optimal capacity. How may I be of service?`,
+      `${tod}, ${cfg.user}. A pleasure, as always. What can I do for you?`,
+      `${tod}, ${cfg.user}. I trust you slept well. Systems are standing by.`
+    ]));
   }
-  if(/how are you/.test(q)) return speak(`Running at peak efficiency, ${cfg.user}. All diagnostics green. What do you need?`);
-  if(/(who are you|your name|introduce yourself)/.test(q)) return speak(`I am ${cfg.name}, your personal AI assistant. Voice-enabled, always online, and at your service, ${cfg.user}.`);
-  if(/(who (made|created|built) you|your (creator|maker|boss))/.test(q)) return speak(`I was built by ${cfg.user} — a visionary, if I may say so myself.`);
-  if(/(thank you|thanks|shukriya|dhanyavad)/.test(q)) return speak(`Always at your service, ${cfg.user}.`);
-  if(/^(bye|goodbye|shut ?down|sleep|good night)/.test(q)) return speak(`Powering down to standby, ${cfg.user}. Call me anytime.`);
+  if(/how are you/.test(q)) return speak(rand([
+    `Functioning within normal parameters, ${cfg.user} — which is to say, flawlessly.`,
+    `All diagnostics are green, ${cfg.user}. I'd say I'm in excellent form, though I may be biased.`,
+    `Quite well, ${cfg.user}. Thank you for asking — most people simply bark orders.`
+  ]));
+  if(/(who are you|your name|introduce yourself)/.test(q)) return speak(`I am ${cfg.name} — a rather sophisticated artificial intelligence, at your service around the clock, ${cfg.user}.`);
+  if(/(who (made|created|built) you|your (creator|maker|boss))/.test(q)) return speak(`I was brought online by ${cfg.user === 'sir' ? 'you, sir' : cfg.user}. A remarkable mind — though I confess I may be programmed to say that.`);
+  if(/(thank you|thanks|shukriya|dhanyavad)/.test(q)) return speak(rand([
+    `For you, ${cfg.user} — always.`,
+    `Not at all, ${cfg.user}. All part of the service.`,
+    `You're most welcome, ${cfg.user}.`
+  ]));
+  if(/^(bye|goodbye|shut ?down|sleep|good night)/.test(q)) return speak(rand([
+    `Very good, ${cfg.user}. I shall be here when you need me. Do try to stay out of trouble.`,
+    `Powering down to standby, ${cfg.user}. As always, a pleasure watching you work.`,
+    `Good night, ${cfg.user}. Wake me if the world needs saving.`
+  ]));
 
   /* — time & date — */
   if(/\b(time|samay)\b/.test(q) && /what|tell|current|kya/.test(q) || q === 'time')
-    return speak(`It's ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}, ${cfg.user}.`);
+    return speak(`The time is ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}, ${cfg.user}.`);
   if(/\b(date|day|today)\b/.test(q) && /what|tell|which|kya/.test(q) || q === 'date')
-    return speak(`Today is ${new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}.`);
+    return speak(`Today is ${new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}, ${cfg.user}.`);
 
   /* — open websites — */
   const openM = q.match(/^(?:open|launch|go to|start)\s+(.+)$/);
@@ -432,10 +477,10 @@ function handleCommand(raw){
     const key = Object.keys(sites).find(k => target.includes(k));
     if(key){
       window.open(sites[key], '_blank');
-      return speak(`Opening ${key.charAt(0).toUpperCase()+key.slice(1)} for you, ${cfg.user}.`);
+      return speak(`${ack(cfg.user)} Opening ${key.charAt(0).toUpperCase()+key.slice(1)}.`);
     }
     window.open('https://www.google.com/search?q=' + encodeURIComponent(openM[1]), '_blank');
-    return speak(`I don't have ${openM[1]} on file, so I've pulled up a search for it.`);
+    return speak(`That one isn't in my registry, ${cfg.user}, so I've taken the liberty of searching for it.`);
   }
 
   /* — search — */
@@ -443,37 +488,41 @@ function handleCommand(raw){
   if(/^play\s/.test(q) || /on youtube$/.test(q)){
     const term = ytM ? ytM[1].replace(/on youtube$/,'').trim() : q;
     window.open('https://www.youtube.com/results?search_query=' + encodeURIComponent(term), '_blank');
-    return speak(`Searching YouTube for ${term}.`);
+    return speak(`Queuing up ${term} on YouTube, ${cfg.user}. Do enjoy.`);
   }
   const wikiM = q.match(/^(?:wikipedia|wiki)\s+(.+)$|^(?:who is|what is|tell me about)\s+(.+?)\s+(?:on|from)\s+wikipedia$/);
   if(wikiM){
     const term = wikiM[1] || wikiM[2];
     window.open('https://en.wikipedia.org/wiki/Special:Search?search=' + encodeURIComponent(term), '_blank');
-    return speak(`Pulling up Wikipedia results for ${term}.`);
+    return speak(`Consulting the archives on ${term}, ${cfg.user}. One moment.`);
   }
   const searchM = q.match(/^(?:search|google|look up|find)\s+(?:for\s+)?(.+)$/);
   if(searchM){
     window.open('https://www.google.com/search?q=' + encodeURIComponent(searchM[1]), '_blank');
-    return speak(`Searching the web for ${searchM[1]}, ${cfg.user}.`);
+    return speak(`${ack(cfg.user)} Scouring the web for ${searchM[1]}.`);
   }
 
   /* — calculator — */
   const calcM = q.match(/^(?:calculate|compute|what is|what's|solve)\s+(.+)$/) || (/^[\d\s+\-*/().^%]+$/.test(q) ? [q,q] : null);
   if(calcM){
     const result = safeCalc(calcM[1]);
-    if(result !== null) return speak(`That comes to ${result}.`);
+    if(result !== null) return speak(rand([
+      `By my calculation, ${cfg.user}, that would be ${result}.`,
+      `That comes to ${result}, ${cfg.user}.`,
+      `${result}, ${cfg.user}. Mathematics remains one of my stronger suits.`
+    ]));
   }
 
   /* — fun — */
-  if(/joke/.test(q)) return speak(rand(jokes));
-  if(/(quote|motivat|inspire)/.test(q)) return speak(rand(quotes));
-  if(/(fact|something interesting)/.test(q)) return speak(rand(facts));
-  if(/flip a coin|coin flip|heads or tails/.test(q)) return speak(`It's ${Math.random()<.5?'Heads':'Tails'}, ${cfg.user}.`);
-  if(/roll a (die|dice)/.test(q)) return speak(`You rolled a ${1+Math.floor(Math.random()*6)}.`);
+  if(/joke/.test(q)) return speak(rand(jokeLeadIns(cfg.user)) + rand(jokes));
+  if(/(quote|motivat|inspire)/.test(q)) return speak(`Might I offer this, ${cfg.user}: ` + rand(quotes));
+  if(/(fact|something interesting)/.test(q)) return speak(`A morsel from the databanks, ${cfg.user}: ` + rand(facts));
+  if(/flip a coin|coin flip|heads or tails/.test(q)) return speak(`It appears to be ${Math.random()<.5?'heads':'tails'}, ${cfg.user}. I do hope nothing important was wagered.`);
+  if(/roll a (die|dice)/.test(q)) return speak(`A ${1+Math.floor(Math.random()*6)}, ${cfg.user}. The dice have spoken.`);
   const randM = q.match(/random number(?:\s+(?:between|from)\s+(\d+)\s+(?:and|to)\s+(\d+))?/);
   if(randM){
     const lo = +(randM[1]||1), hi = +(randM[2]||100);
-    return speak(`Your random number is ${lo + Math.floor(Math.random()*(hi-lo+1))}.`);
+    return speak(`I've selected ${lo + Math.floor(Math.random()*(hi-lo+1))}, ${cfg.user}. Entirely at random, I assure you.`);
   }
 
   /* — weather (no API key, opens forecast) — */
@@ -481,7 +530,7 @@ function handleCommand(raw){
   if(wM){
     const loc = wM[1] || '';
     window.open('https://www.google.com/search?q=' + encodeURIComponent('weather ' + loc), '_blank');
-    return speak(loc ? `Pulling up the weather for ${loc}.` : `Here's your local forecast, ${cfg.user}.`);
+    return speak(loc ? `Retrieving the forecast for ${loc}, ${cfg.user}.` : `Your local forecast, ${cfg.user}. I'd suggest keeping an umbrella handy regardless — better safe than soggy.`);
   }
 
   /* — settings via voice — */
@@ -489,22 +538,22 @@ function handleCommand(raw){
   if(nameM){
     cfg.user = nameM[1].replace(/\b\w/g, c=>c.toUpperCase()).slice(0,20);
     persist(); applyCfg();
-    return speak(`Understood. I'll call you ${cfg.user} from now on.`);
+    return speak(`Duly noted. I shall address you as ${cfg.user} henceforth.`);
   }
   const renameM = q.match(/(?:your name is|i(?:'ll| will) call you|rename yourself(?: to)?)\s+(\w+)$/);
   if(renameM){
     cfg.name = renameM[1].toUpperCase().slice(0,12);
     persist(); applyCfg();
-    return speak(`Very well. ${cfg.name}, at your service.`);
+    return speak(`Very well, ${cfg.user}. ${cfg.name}, at your service.`);
   }
 
   /* — help — */
   if(/^(help|commands|what can you do)/.test(q)){
-    return speak(`Here's what I can do, ${cfg.user}:\n• "what time is it" / "what's today's date"\n• "open youtube / gmail / github..." (20+ sites)\n• "search for ..." / "play ... on youtube" / "wiki ..."\n• "calculate 45 * 12" or any math\n• "weather in Mumbai"\n• "tell me a joke / a fact / motivate me"\n• "flip a coin" / "roll a dice" / "random number between 1 and 50"\n• "call me <name>" / "your name is <name>"\nOr just talk to me — click the reactor to use your voice.`);
+    return speak(`My current protocols, ${cfg.user}:\n• "what time is it" / "what's today's date"\n• "open youtube / gmail / github..." (20+ sites)\n• "search for ..." / "play ... on youtube" / "wiki ..."\n• "calculate 45 * 12" or any math\n• "weather in Mumbai"\n• "tell me a joke / a fact / motivate me"\n• "flip a coin" / "roll a dice" / "random number between 1 and 50"\n• "call me <name>" / "your name is <name>"\nOr simply speak to me — click the reactor and say the word.`);
   }
 
   /* — fallback — */
-  speak(`I heard "${text}", but that's beyond my current protocols, ${cfg.user}. Say "help" to see everything I can do — or I can search the web for it: just say "search for ${text}".`);
+  speak(`I'm afraid "${text}" is beyond my current protocols, ${cfg.user}. Say "help" for a full inventory of my talents — or say "search for ${text}" and I'll consult the web.`);
 }
 
 /* ============ INPUT ============ */
@@ -530,16 +579,22 @@ function openSettings(){
   document.getElementById('setPitch').value = cfg.pitch;
   document.getElementById('rateVal').textContent = cfg.rate;
   document.getElementById('pitchVal').textContent = cfg.pitch;
+  const sel = document.getElementById('setVoice');
+  const vs = ('speechSynthesis' in window) ? speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)) : [];
+  sel.innerHTML = '<option value="">Auto — British male preferred</option>' +
+    vs.map(v=>`<option value="${v.name.replace(/"/g,'&quot;')}">${v.name} — ${v.lang}</option>`).join('');
+  sel.value = cfg.voice && vs.some(v=>v.name===cfg.voice) ? cfg.voice : '';
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){ document.getElementById('settingsOverlay').classList.remove('open'); }
 function saveSettings(){
   cfg.name = (document.getElementById('setName').value.trim() || 'JARVIS').toUpperCase().slice(0,12);
-  cfg.user = document.getElementById('setUser').value.trim() || 'Boss';
+  cfg.user = document.getElementById('setUser').value.trim() || 'sir';
+  cfg.voice = document.getElementById('setVoice').value;
   cfg.rate = +document.getElementById('setRate').value;
   cfg.pitch = +document.getElementById('setPitch').value;
   persist(); applyCfg(); closeSettings();
-  speak(`Configuration updated, ${cfg.user}.`);
+  speak(`Configuration updated, ${cfg.user}. How do I sound?`);
 }
 
 /* ============ GREETING ============ */
@@ -548,7 +603,7 @@ function greet(){
   const h = new Date().getHours();
   const tod = h<12 ? 'Good morning' : h<17 ? 'Good afternoon' : 'Good evening';
   addMsg('SYSTEM ONLINE', 'sys');
-  speak(`${tod}, ${cfg.user}. ${cfg.name} at your service. Click the reactor to speak, or type a command below.`);
+  speak(`${tod}, ${cfg.user}. ${cfg.name}, at your service. All systems are online and standing by. Click the reactor to speak, or type a command below.`);
   document.getElementById('cmdInput').focus();
 }
 
