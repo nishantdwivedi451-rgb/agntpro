@@ -4,15 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>J.A.R.V.I.S. — Stark OS MK VII</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="description" content="JARVIS — a voice-enabled personal AI assistant with live news briefings and persistent memory.">
+<meta name="theme-color" content="#080503">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13.5' fill='none' stroke='%23E8B04B' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='%234FD8FF'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#080503;--bg2:#0E0906;--panel:rgba(26,17,8,.72);--panel2:rgba(18,12,6,.85);
-  --border:rgba(255,182,39,.22);--border-h:rgba(255,182,39,.55);
-  --gold:#FFB627;--gold-d:#E09000;--gold-glow:rgba(255,182,39,.35);
-  --cyan:#4FD8FF;--cyan-glow:rgba(79,216,255,.4);
-  --red:#FF4D4D;--red-glow:rgba(255,77,77,.4);--green:#7CE38B;
-  --text:#F4E8D4;--muted:#9C8A66;--faint:#4A3D26;
+  --bg:#0A0806;--bg2:#100C08;--panel:rgba(255,255,255,.025);--panel2:rgba(18,12,6,.85);
+  --line:rgba(255,255,255,.07);
+  --border:rgba(232,176,75,.18);--border-h:rgba(232,176,75,.5);
+  --gold:#E8B04B;--gold-d:#C8912E;--gold-glow:rgba(232,176,75,.25);
+  --cyan:#4FD8FF;--cyan-glow:rgba(79,216,255,.3);
+  --red:#F0566B;--red-glow:rgba(240,86,107,.35);--green:#6FCE7F;
+  --text:#EFE8DA;--muted:#968C72;--faint:#453B28;
   --font:'Rajdhani',sans-serif;--display:'Orbitron',sans-serif;--mono:'IBM Plex Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -20,10 +24,10 @@ html,body{height:100%}
 body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
 
 /* ambient background */
-.grid-bg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,182,39,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,182,39,.035) 1px,transparent 1px);background-size:46px 46px}
-.glow-spots{position:fixed;inset:0;pointer-events:none;background:radial-gradient(600px 400px at 18% 80%,rgba(255,140,0,.06),transparent 70%),radial-gradient(700px 500px at 82% 15%,rgba(79,216,255,.05),transparent 70%),radial-gradient(500px 500px at 50% 50%,rgba(255,182,39,.04),transparent 70%)}
+.grid-bg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(232,176,75,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(232,176,75,.022) 1px,transparent 1px);background-size:46px 46px}
+.glow-spots{position:fixed;inset:0;pointer-events:none;background:radial-gradient(600px 400px at 18% 80%,rgba(255,140,0,.06),transparent 70%),radial-gradient(700px 500px at 82% 15%,rgba(79,216,255,.05),transparent 70%),radial-gradient(500px 500px at 50% 50%,rgba(232,176,75,.04),transparent 70%)}
 .vignette{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 25%,rgba(5,3,1,.88) 100%);pointer-events:none}
-.scanline{position:fixed;left:0;right:0;height:140px;background:linear-gradient(180deg,transparent,rgba(255,182,39,.035),transparent);animation:scan 8s linear infinite;pointer-events:none}
+.scanline{position:fixed;left:0;right:0;height:140px;background:linear-gradient(180deg,transparent,rgba(232,176,75,.035),transparent);animation:scan 8s linear infinite;pointer-events:none}
 @keyframes scan{from{top:-160px}to{top:100vh}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes spinRev{to{transform:rotate(-360deg)}}
@@ -33,33 +37,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 .app{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:250px 1fr 392px;grid-template-rows:62px 1fr;gap:0}
 
 /* ============ TOP BAR ============ */
-.topbar{grid-column:1/4;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--border);background:rgba(10,6,3,.72);backdrop-filter:blur(14px)}
-.topbar::after{content:'';position:absolute;top:61px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-glow) 30%,var(--cyan-glow) 70%,transparent);opacity:.5;pointer-events:none}
+.topbar{grid-column:1/4;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:rgba(10,6,3,.72);backdrop-filter:blur(14px)}
+
 .brand{display:flex;align-items:center;gap:13px}
-.brand-mark{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 16px rgba(255,182,39,.25),inset 0 0 8px rgba(255,182,39,.15)}
+.brand-mark{width:34px;height:34px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 16px rgba(232,176,75,.25),inset 0 0 8px rgba(232,176,75,.15)}
 .brand-mark::after{content:'';width:13px;height:13px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan);animation:corePulse 2.4s ease-in-out infinite}
-.brand-name{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:4px;color:var(--gold);text-shadow:0 0 20px var(--gold-glow)}
-.brand-sub{font-size:10px;letter-spacing:3.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.brand-name{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:3px;color:var(--gold)}
+.brand-sub{font-size:9.5px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-top:3px}
 .brand-sub b{color:var(--cyan);font-weight:600}
 .top-stats{display:flex;gap:24px;align-items:center}
 .tstat{text-align:right}
 .tstat-v{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text)}
 .tstat-l{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
 .sys-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);margin-right:6px;animation:corePulse 2s infinite}
-.cfg-btn{height:32px;padding:0 14px;border-radius:7px;border:1px solid var(--border);background:rgba(255,182,39,.07);color:var(--gold);font-family:var(--mono);font-size:11px;letter-spacing:1.5px;cursor:pointer;transition:all .2s}
-.cfg-btn:hover{border-color:var(--border-h);box-shadow:0 0 14px rgba(255,182,39,.18)}
+.cfg-btn{height:32px;padding:0 14px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10.5px;letter-spacing:1.5px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.cfg-btn:hover{border-color:var(--border-h);color:var(--gold)}
+.cfg-btn svg{width:13px;height:13px}
 
 /* ============ LEFT — SUIT TELEMETRY ============ */
-.telemetry{border-right:1px solid var(--border);background:rgba(10,6,3,.5);backdrop-filter:blur(10px);padding:16px 14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.telemetry{border-right:1px solid var(--line);background:rgba(10,6,3,.5);backdrop-filter:blur(10px);padding:16px 14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
 .telemetry::-webkit-scrollbar{width:4px}.telemetry::-webkit-scrollbar-thumb{background:var(--faint);border-radius:2px}
-.tpanel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px 14px;position:relative;overflow:hidden}
-.tpanel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,var(--gold) 0 8px,transparent 8px 16px);opacity:.35}
-.tpanel-title{font-family:var(--display);font-size:9px;font-weight:600;letter-spacing:2.5px;color:var(--gold);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-.tpanel-title .tag{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px}
+.tpanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 15px;position:relative;overflow:hidden}
+.tpanel::before{content:'';position:absolute;top:0;left:15px;width:24px;height:2px;background:var(--gold);border-radius:0 0 2px 2px;opacity:.9}
+.tpanel-title{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:2px;color:var(--gold);margin-bottom:11px;display:flex;justify-content:space-between;align-items:center;text-transform:uppercase}
+.tpanel-title .tag{font-size:8.5px;color:var(--faint);letter-spacing:1px}
 
 /* reactor power gauge */
 .pwr-wrap{display:flex;align-items:center;gap:14px}
-.pwr-ring{width:74px;height:74px;border-radius:50%;background:conic-gradient(var(--gold) 360deg,rgba(255,182,39,.1) 0);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 1s}
+.pwr-ring{width:74px;height:74px;border-radius:50%;background:conic-gradient(var(--gold) 360deg,rgba(232,176,75,.1) 0);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 1s}
 .pwr-inner{width:58px;height:58px;border-radius:50%;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center}
 .pwr-val{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--gold)}
 .pwr-lbl{font-size:8px;letter-spacing:1px;color:var(--muted)}
@@ -69,9 +74,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 
 /* radar */
 .radar{position:relative;width:100%;aspect-ratio:1;border-radius:50%;border:1px solid var(--border);background:
-  radial-gradient(circle,transparent 0 24%,rgba(255,182,39,.14) 24.5% 25%,transparent 25.5% 49%,rgba(255,182,39,.14) 49.5% 50%,transparent 50.5% 74%,rgba(255,182,39,.14) 74.5% 75%,transparent 75.5%),
-  linear-gradient(rgba(255,182,39,.12),rgba(255,182,39,.12)) 50% 0/1px 100% no-repeat,
-  linear-gradient(90deg,rgba(255,182,39,.12),rgba(255,182,39,.12)) 0 50%/100% 1px no-repeat;overflow:hidden}
+  radial-gradient(circle,transparent 0 24%,rgba(232,176,75,.14) 24.5% 25%,transparent 25.5% 49%,rgba(232,176,75,.14) 49.5% 50%,transparent 50.5% 74%,rgba(232,176,75,.14) 74.5% 75%,transparent 75.5%),
+  linear-gradient(rgba(232,176,75,.12),rgba(232,176,75,.12)) 50% 0/1px 100% no-repeat,
+  linear-gradient(90deg,rgba(232,176,75,.12),rgba(232,176,75,.12)) 0 50%/100% 1px no-repeat;overflow:hidden}
 .radar-sweep{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(79,216,255,.45),rgba(79,216,255,.08) 55deg,transparent 70deg);animation:spin 3.2s linear infinite}
 .blip{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 7px var(--cyan);animation:blink 2.6s infinite}
 .blip.hostile{background:var(--red);box-shadow:0 0 7px var(--red)}
@@ -79,43 +84,41 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 .radar-status b{color:var(--green);font-weight:600}
 
 /* diag rows */
-.diag-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,182,39,.08);font-size:12px}
+.diag-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px}
 .diag-row:last-child{border-bottom:none}
 .diag-k{color:var(--muted);letter-spacing:.5px}
 .diag-v{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text)}
 .diag-v.hot{color:var(--gold)}.diag-v.cool{color:var(--cyan)}
 
 /* threat meter */
-.threat-bar{height:6px;border-radius:3px;background:rgba(255,182,39,.1);overflow:hidden;margin-top:4px}
+.threat-bar{height:6px;border-radius:3px;background:rgba(232,176,75,.1);overflow:hidden;margin-top:4px}
 .threat-fill{height:100%;width:8%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--gold));transition:width 1s}
 .threat-lbl{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--mono);font-size:9px;letter-spacing:1px}
 .threat-lbl span:first-child{color:var(--muted)}.threat-lbl span:last-child{color:var(--green);font-weight:600}
 
 /* ============ CENTER — HUD ============ */
 .hud{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:hidden}
-.corner{position:absolute;width:60px;height:60px;border-color:var(--border-h);border-style:solid;border-width:0;opacity:.8}
-.corner.tl{top:14px;left:14px;border-top-width:2px;border-left-width:2px}
-.corner.tr{top:14px;right:14px;border-top-width:2px;border-right-width:2px}
-.corner.bl{bottom:14px;left:14px;border-bottom-width:2px;border-left-width:2px}
-.corner.br{bottom:14px;right:14px;border-bottom-width:2px;border-right-width:2px}
-.corner::after{content:'';position:absolute;width:7px;height:7px;background:var(--gold);opacity:.7}
-.corner.tl::after{top:-2px;left:-2px}.corner.tr::after{top:-2px;right:-2px}.corner.bl::after{bottom:-2px;left:-2px}.corner.br::after{bottom:-2px;right:-2px}
+.corner{position:absolute;width:44px;height:44px;border-color:rgba(232,176,75,.3);border-style:solid;border-width:0;opacity:.9}
+.corner.tl{top:16px;left:16px;border-top-width:1.5px;border-left-width:1.5px}
+.corner.tr{top:16px;right:16px;border-top-width:1.5px;border-right-width:1.5px}
+.corner.bl{bottom:16px;left:16px;border-bottom-width:1.5px;border-left-width:1.5px}
+.corner.br{bottom:16px;right:16px;border-bottom-width:1.5px;border-right-width:1.5px}
 
 /* ARC REACTOR — MK VII */
 .reactor{position:relative;width:min(320px,34vh);height:min(320px,34vh);cursor:pointer;user-select:none;flex-shrink:0}
 .ring{position:absolute;inset:0;border-radius:50%}
-.ring-ticks{inset:0;background:repeating-conic-gradient(var(--gold) 0deg 1.6deg,transparent 1.6deg 9deg);-webkit-mask:radial-gradient(circle,transparent 0 82%,#000 83% 92%,transparent 93%);mask:radial-gradient(circle,transparent 0 82%,#000 83% 92%,transparent 93%);animation:spin 30s linear infinite;opacity:.55}
-.ring-dashed{inset:7%;border:1px dashed rgba(255,182,39,.4);animation:spinRev 22s linear infinite}
-.ring-arc1{inset:13%;border:3px solid transparent;border-top-color:var(--gold);border-right-color:rgba(255,182,39,.3);animation:spin 4.5s linear infinite;filter:drop-shadow(0 0 6px var(--gold-glow))}
+.ring-ticks{inset:0;background:repeating-conic-gradient(var(--gold) 0deg 1.4deg,transparent 1.4deg 9deg);-webkit-mask:radial-gradient(circle,transparent 0 82%,#000 83% 92%,transparent 93%);mask:radial-gradient(circle,transparent 0 82%,#000 83% 92%,transparent 93%);animation:spin 30s linear infinite;opacity:.4}
+.ring-dashed{inset:7%;border:1px dashed rgba(232,176,75,.4);animation:spinRev 22s linear infinite}
+.ring-arc1{inset:13%;border:3px solid transparent;border-top-color:var(--gold);border-right-color:rgba(232,176,75,.3);animation:spin 4.5s linear infinite;filter:drop-shadow(0 0 6px var(--gold-glow))}
 .ring-arc2{inset:21%;border:1px solid rgba(79,216,255,.25);animation:spinRev 13s linear infinite}
 .ring-arc2::before{content:'';position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
 .ring-arc3{inset:28%;border:2px solid transparent;border-bottom-color:var(--cyan);border-left-color:rgba(79,216,255,.2);animation:spin 7.5s linear infinite;opacity:.9}
-.ring-seg{inset:34%;background:repeating-conic-gradient(rgba(79,216,255,.75) 0deg 14deg,transparent 14deg 20deg);-webkit-mask:radial-gradient(circle,transparent 0 78%,#000 79% 100%);mask:radial-gradient(circle,transparent 0 78%,#000 79% 100%);animation:spinRev 10s linear infinite}
+.ring-seg{inset:34%;background:repeating-conic-gradient(rgba(79,216,255,.55) 0deg 14deg,transparent 14deg 20deg);-webkit-mask:radial-gradient(circle,transparent 0 78%,#000 79% 100%);mask:radial-gradient(circle,transparent 0 78%,#000 79% 100%);animation:spinRev 10s linear infinite}
 .core{position:absolute;inset:40%;border-radius:50%;background:radial-gradient(circle,#FFFFFF 0%,#BDEEFF 30%,var(--cyan) 55%,rgba(12,80,110,.95) 100%);box-shadow:0 0 50px var(--cyan-glow),0 0 110px rgba(79,216,255,.22),inset 0 0 24px rgba(255,255,255,.65);display:flex;align-items:center;justify-content:center;transition:all .3s}
 .core-icon{font-family:var(--display);font-size:clamp(15px,2.7vh,23px);font-weight:900;color:#05303f;letter-spacing:1px}
-.reactor.listening .core{background:radial-gradient(circle,#fff 0%,#FFC9C9 30%,var(--red) 60%,#5e0f0f 100%);box-shadow:0 0 60px var(--red-glow),0 0 120px rgba(255,77,77,.25),inset 0 0 24px rgba(255,255,255,.6)}
+.reactor.listening .core{background:radial-gradient(circle,#fff 0%,#FFC9C9 30%,var(--red) 60%,#5e0f0f 100%);box-shadow:0 0 60px var(--red-glow),0 0 120px rgba(240,86,107,.25),inset 0 0 24px rgba(255,255,255,.6)}
 .reactor.listening .ring-arc1{animation-duration:1s;border-top-color:var(--red);filter:drop-shadow(0 0 6px var(--red-glow))}
-.reactor.listening .ring-seg{background:repeating-conic-gradient(rgba(255,77,77,.75) 0deg 14deg,transparent 14deg 20deg)}
+.reactor.listening .ring-seg{background:repeating-conic-gradient(rgba(240,86,107,.75) 0deg 14deg,transparent 14deg 20deg)}
 .reactor.speaking .ring-arc1{animation-duration:2s}
 .reactor.speaking .core{animation:corePulse 1s ease-in-out infinite}
 
@@ -126,47 +129,48 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 @keyframes wv{0%,100%{height:6px}50%{height:32px}}
 .wave.on .wbar:nth-child(1){animation-delay:0s}.wave.on .wbar:nth-child(2){animation-delay:.1s}.wave.on .wbar:nth-child(3){animation-delay:.2s}.wave.on .wbar:nth-child(4){animation-delay:.3s}.wave.on .wbar:nth-child(5){animation-delay:.15s}.wave.on .wbar:nth-child(6){animation-delay:.25s}.wave.on .wbar:nth-child(7){animation-delay:.05s}
 
-.status-line{margin-top:14px;font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;min-height:18px;text-align:center;text-shadow:0 0 14px var(--gold-glow)}
-.hint{margin-top:8px;font-size:12.5px;color:var(--muted);letter-spacing:.4px;text-align:center;max-width:480px;line-height:1.6}
-.hint kbd{font-family:var(--mono);font-size:10px;background:rgba(255,182,39,.09);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--gold)}
+.status-line{margin-top:16px;font-family:var(--mono);font-size:11px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;min-height:17px;text-align:center}
+.hint{margin-top:9px;font-size:12.5px;color:var(--muted);letter-spacing:.3px;text-align:center;max-width:440px;line-height:1.65}
 
-.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px;max-width:620px}
-.chip{font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--text);background:var(--panel);border:1px solid var(--border);border-radius:100px;padding:7px 16px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)}
-.chip:hover{border-color:var(--border-h);color:var(--gold);box-shadow:0 0 16px rgba(255,182,39,.14);transform:translateY(-1px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:26px;max-width:640px}
+.chip{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:8px 15px;cursor:pointer;transition:all .18s}
+.chip:hover{border-color:var(--border-h);color:var(--gold);background:rgba(232,176,75,.05)}
 
 /* ============ RIGHT — CONSOLE ============ */
-.console{border-left:1px solid var(--border);background:rgba(12,7,4,.6);backdrop-filter:blur(14px);display:flex;flex-direction:column;overflow:hidden}
-.console-head{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:relative}
-.console-head::after{content:'';position:absolute;bottom:-1px;left:0;width:90px;height:1px;background:var(--gold);box-shadow:0 0 8px var(--gold-glow)}
-.console-title{font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:3px;color:var(--gold)}
+.console{border-left:1px solid var(--line);background:rgba(12,7,4,.6);backdrop-filter:blur(14px);display:flex;flex-direction:column;overflow:hidden}
+.console-head{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:relative}
+.console-head::after{content:'';position:absolute;bottom:-1px;left:18px;width:52px;height:1px;background:var(--gold);opacity:.8}
+.console-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:var(--gold)}
 .console-actions{display:flex;gap:8px}
-.icon-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:var(--mono)}
+.icon-btn{width:27px;height:27px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .icon-btn:hover{border-color:var(--border-h);color:var(--gold)}
+.icon-btn svg{width:13px;height:13px}
 .log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
 .log::-webkit-scrollbar{width:5px}.log::-webkit-scrollbar-thumb{background:var(--faint);border-radius:3px}.log::-webkit-scrollbar-track{background:transparent}
-.msg{max-width:88%;padding:10px 14px;border-radius:10px;font-size:14px;line-height:1.55;animation:msgIn .3s ease both;white-space:pre-line}
+.msg{max-width:88%;padding:10px 14px;border-radius:9px;font-size:14px;line-height:1.6;animation:msgIn .3s ease both;white-space:pre-line;letter-spacing:.2px}
 @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.msg-user{align-self:flex-end;background:rgba(79,216,255,.1);border:1px solid rgba(79,216,255,.25);color:var(--text);border-bottom-right-radius:3px}
-.msg-jarvis{align-self:flex-start;background:var(--panel);border:1px solid rgba(255,255,255,.05);border-left:2px solid var(--gold);border-bottom-left-radius:3px}
-.msg-sys{align-self:center;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;background:transparent;padding:2px}
-.msg-time{display:block;font-family:var(--mono);font-size:9px;color:var(--faint);margin-top:5px;letter-spacing:1px}
-.console-input{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border)}
-.console-input input{flex:1;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);outline:none;transition:border-color .2s}
-.console-input input:focus{border-color:var(--border-h);box-shadow:0 0 14px rgba(255,182,39,.1)}
+.msg-user{align-self:flex-end;background:rgba(79,216,255,.06);border:1px solid rgba(79,216,255,.16);color:var(--text);border-bottom-right-radius:3px}
+.msg-jarvis{align-self:flex-start;background:rgba(255,255,255,.03);border:1px solid var(--line);border-left:2px solid var(--gold);border-bottom-left-radius:3px}
+.msg-sys{align-self:center;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--faint);text-transform:uppercase;background:transparent;padding:2px}
+.msg-time{display:block;font-family:var(--mono);font-size:8.5px;color:var(--faint);margin-top:6px;letter-spacing:1px}
+.console-input{display:flex;gap:8px;padding:14px;border-top:1px solid var(--line)}
+.console-input input{flex:1;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);outline:none;transition:border-color .2s}
+.console-input input:focus{border-color:var(--border-h);box-shadow:0 0 14px rgba(232,176,75,.1)}
 .console-input input::placeholder{color:var(--faint)}
-.send-btn,.mic-btn{width:42px;height:42px;border-radius:8px;border:1px solid var(--border);background:rgba(255,182,39,.09);color:var(--gold);font-size:16px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.send-btn:hover,.mic-btn:hover{background:rgba(255,182,39,.2);box-shadow:0 0 14px rgba(255,182,39,.2)}
-.mic-btn.live{background:rgba(255,77,77,.16);border-color:rgba(255,77,77,.5);color:var(--red);animation:corePulse 1.2s infinite}
+.send-btn,.mic-btn{width:42px;height:42px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send-btn:hover,.mic-btn:hover{border-color:var(--border-h);color:var(--gold);background:rgba(232,176,75,.05)}
+.send-btn svg,.mic-btn svg{width:17px;height:17px}
+.mic-btn.live{background:rgba(240,86,107,.12);border-color:rgba(240,86,107,.45);color:var(--red);animation:corePulse 1.2s infinite}
 
 /* ============ SETTINGS MODAL ============ */
 .overlay{display:none;position:fixed;inset:0;background:rgba(4,2,1,.78);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:24px}
 .overlay.open{display:flex}
-.modal{width:100%;max-width:440px;background:var(--bg2);border:1px solid var(--border-h);border-radius:14px;padding:26px;box-shadow:0 0 60px rgba(255,182,39,.12);animation:msgIn .3s ease}
-.modal h3{font-family:var(--display);font-size:14px;letter-spacing:3px;color:var(--gold);margin-bottom:4px}
+.modal{width:100%;max-width:440px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:26px;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:msgIn .3s ease}
+.modal h3{font-family:var(--mono);font-size:12px;letter-spacing:2.5px;color:var(--gold);margin-bottom:4px}
 .modal .sub{font-size:12px;color:var(--muted);margin-bottom:20px}
 .fg{margin-bottom:14px}
 .fg label{display:block;font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
-.fg input,.fg select{width:100%;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);outline:none}
+.fg input,.fg select{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:8px;padding:10px 13px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);outline:none}
 .fg input:focus,.fg select:focus{border-color:var(--border-h)}
 .fg input[type=range]{padding:0;accent-color:var(--gold)}
 .fg .note{font-size:10.5px;color:var(--muted);line-height:1.5;margin-top:5px;letter-spacing:.3px}
@@ -185,7 +189,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 /* ============ BOOT ============ */
 .boot{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s}
 .boot.done{opacity:0;pointer-events:none}
-.boot-logo{font-family:var(--display);font-size:32px;font-weight:900;letter-spacing:10px;color:var(--gold);text-shadow:0 0 34px var(--gold-glow)}
+.boot-logo{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:9px;color:var(--gold)}
 .boot-sub{font-family:var(--mono);font-size:10px;letter-spacing:4px;color:var(--muted);margin-top:-8px}
 .boot-lines{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:2;text-align:left;min-height:150px;letter-spacing:1px}
 .boot-lines .ok{color:var(--green)}
@@ -223,14 +227,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
       <div class="brand-mark"></div>
       <div>
         <div class="brand-name" id="brandName">J.A.R.V.I.S.</div>
-        <div class="brand-sub">STARK OS &middot; <b>MK VII</b> &middot; JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+        <div class="brand-sub">STARK OS &middot; <b>MK VII</b></div>
       </div>
     </div>
     <div class="top-stats">
       <div class="tstat"><div class="tstat-v" id="clock">--:--:--</div><div class="tstat-l">Local Time</div></div>
       <div class="tstat"><div class="tstat-v" id="dateNow">—</div><div class="tstat-l">Date</div></div>
       <div class="tstat"><div class="tstat-v"><span class="sys-dot"></span>ONLINE</div><div class="tstat-l">All Systems</div></div>
-      <button class="cfg-btn" onclick="openSettings()">⚙ CONFIG</button>
+      <button class="cfg-btn" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>CONFIG</button>
     </div>
   </div>
 
@@ -279,17 +283,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
     </div>
     <div class="wave" id="wave"><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div></div>
     <div class="status-line" id="statusLine">Standing by</div>
-    <div class="hint">Click the reactor or press <kbd>Space</kbd> to speak, or type below. Ask me <em>anything</em> — <kbd>give me a news briefing</kbd>, <kbd>explain quantum computing</kbd>, <kbd>open youtube</kbd>, <kbd>calculate 45 * 12</kbd>. Add your xAI key in <kbd>⚙ CONFIG</kbd> to unlock my full Grok-powered intellect.</div>
+    <div class="hint">Press Space or tap the core to speak — or type below. Ask anything, request a news briefing, open sites, do maths. Add your xAI key under Config to enable the Grok intellect.</div>
     <div class="chips">
-      <button class="chip" onclick="quick('what time is it')">🕐 Time</button>
-      <button class="chip" onclick="quick('what is today\'s date')">📅 Date</button>
-      <button class="chip" onclick="quick('tell me a joke')">😄 Joke</button>
-      <button class="chip" onclick="quick('open youtube')">▶ YouTube</button>
-      <button class="chip" onclick="quick('give me a news briefing')">📰 News Briefing</button>
-      <button class="chip" onclick="quick('calculate 128 * 46')">🧮 Calculate</button>
-      <button class="chip" onclick="quick('flip a coin')">🪙 Coin Flip</button>
-      <button class="chip" onclick="quick('motivate me')">⚡ Motivate</button>
-      <button class="chip" onclick="quick('help')">❓ All Commands</button>
+      <button class="chip" onclick="quick('what time is it')">Time</button>
+      <button class="chip" onclick="quick('what is today\'s date')">Date</button>
+      <button class="chip" onclick="quick('tell me a joke')">Joke</button>
+      <button class="chip" onclick="quick('open youtube')">YouTube</button>
+      <button class="chip" onclick="quick('give me a news briefing')">News Briefing</button>
+      <button class="chip" onclick="quick('calculate 128 * 46')">Calculate</button>
+      <button class="chip" onclick="quick('flip a coin')">Coin Flip</button>
+      <button class="chip" onclick="quick('motivate me')">Motivate</button>
+      <button class="chip" onclick="quick('help')">All Commands</button>
     </div>
   </div>
 
@@ -298,15 +302,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
     <div class="console-head">
       <div class="console-title">COMMAND LOG</div>
       <div class="console-actions">
-        <button class="icon-btn" title="Mute / unmute voice" id="muteBtn" onclick="toggleMute()">🔊</button>
-        <button class="icon-btn" title="Clear log" onclick="clearLog()">✕</button>
+        <button class="icon-btn" title="Mute / unmute voice" id="muteBtn" onclick="toggleMute()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 3 9 3 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+        <button class="icon-btn" title="Clear log" onclick="clearLog()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
       </div>
     </div>
     <div class="log" id="log"></div>
     <div class="console-input">
-      <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice input">🎙</button>
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Voice input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21.5"/></svg></button>
       <input id="cmdInput" placeholder="Your command, sir..." autocomplete="off" onkeydown="if(event.key==='Enter')submitCmd()">
-      <button class="send-btn" onclick="submitCmd()">↑</button>
+      <button class="send-btn" onclick="submitCmd()" title="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
     </div>
   </div>
 </div>
@@ -314,7 +318,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);overflow:hid
 <!-- settings -->
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
-    <h3>⚙ CONFIGURATION</h3>
+    <h3>CONFIGURATION</h3>
     <p class="sub">Make this assistant truly yours.</p>
     <div class="fg"><label>Assistant Name</label><input id="setName" maxlength="12" placeholder="JARVIS"></div>
     <div class="fg"><label>Your Name (how it addresses you)</label><input id="setUser" maxlength="20" placeholder="sir"></div>
@@ -418,7 +422,7 @@ function setPower(p){
   if(!ring) return;
   val.textContent = p + '%';
   const col = p > 40 ? 'var(--gold)' : 'var(--red)';
-  ring.style.background = `conic-gradient(${col} ${p*3.6}deg, rgba(255,182,39,.1) 0)`;
+  ring.style.background = `conic-gradient(${col} ${p*3.6}deg, rgba(232,176,75,.1) 0)`;
   document.getElementById('pwrCore').textContent = p > 40 ? 'STABLE' : 'CONSERVE';
   document.getElementById('pwrFlow').textContent = (p/100*3.2).toFixed(1) + ' GJ/s';
 }
@@ -509,7 +513,7 @@ function speak(text){
   setStatus('Standing by');
   if(cfg.muted || !('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text.replace(/[🕐📅😄▶🔍🧮🪙⚡❓•]/g,''));
+  const u = new SpeechSynthesisUtterance(text.replace(/[•*_#]/g,''));
   u.rate = cfg.rate; u.pitch = cfg.pitch;
   const v = pickVoice();
   if(v) u.voice = v;
@@ -518,9 +522,11 @@ function speak(text){
   u.onend = ()=>{ reactor.classList.remove('speaking'); wave.classList.remove('on'); setStatus('Standing by'); };
   speechSynthesis.speak(u);
 }
+const ICON_SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 3 9 3 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>';
+const ICON_MUTED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 3 9 3 15 6 15 11 19 11 5"/><line x1="15" y1="9" x2="21" y2="15"/><line x1="21" y1="9" x2="15" y2="15"/></svg>';
 function toggleMute(){
   cfg.muted = !cfg.muted;
-  document.getElementById('muteBtn').textContent = cfg.muted ? '🔇' : '🔊';
+  document.getElementById('muteBtn').innerHTML = cfg.muted ? ICON_MUTED : ICON_SPK;
   if(cfg.muted) speechSynthesis.cancel();
   persist();
   addMsg(cfg.muted ? 'VOICE OUTPUT MUTED' : 'VOICE OUTPUT ENABLED', 'sys');
@@ -855,7 +861,7 @@ function applyCfg(){
   document.getElementById('brandName').textContent = cfg.name === 'JARVIS' ? 'J.A.R.V.I.S.' : cfg.name;
   document.getElementById('coreIcon').textContent = cfg.name.charAt(0);
   document.title = cfg.name + ' — Stark OS MK VII';
-  document.getElementById('muteBtn').textContent = cfg.muted ? '🔇' : '🔊';
+  document.getElementById('muteBtn').innerHTML = cfg.muted ? ICON_MUTED : ICON_SPK;
   const ai = document.getElementById('aiState');
   if(ai){
     ai.textContent = cfg.grokKey ? 'GROK ONLINE' : 'LOCAL MODE';
